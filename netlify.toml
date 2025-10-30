@@ -1,0 +1,35 @@
+# Configuração Netlify
+[build]
+  # Comandos de build do Next.js
+  command = "npm run build"
+  publish = ".next"
+
+# Plugins
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+# Headers de segurança
+[[headers]]
+  for = "/api/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "DENY"
+
+# Headers para imagens
+[[headers]]
+  for = "/images/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+    X-Content-Type-Options = "nosniff"
+
+# Redirecionamentos (opcional)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+  conditions = {Country = ["US", "CA"]}
+
+# Variáveis de ambiente (valores padrão)
+[build.environment]
+  NEXT_PUBLIC_BASE_URL = "https://marmari.netlify.app"
+
