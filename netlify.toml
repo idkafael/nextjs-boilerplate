@@ -1,11 +1,11 @@
-# Configuração Netlify
+# Configuração Netlify para Next.js
 [build]
   # Comandos de build do Next.js
   command = "npm run build"
   publish = ".next"
 
-# Plugins
-[[plugins]]
+# Plugins - Netlify Next.js runtime
+[plugins]
   package = "@netlify/plugin-nextjs"
 
 # Headers de segurança
