@@ -8,15 +8,15 @@ Sistema completo de pagamento PIX integrado com PushinPay para conteúdo premium
 - **React 18** - Biblioteca UI
 - **Tailwind CSS** - Estilização
 - **PushinPay API** - Pagamentos PIX
-- **Vercel** - Hospedagem
+- **Netlify** - Hospedagem
 
 ## 📋 Instalação
 
 ### 1. Clone o repositório
 
 ```bash
-git clone https://github.com/seu-usuario/privacy-nextjs.git
-cd privacy-nextjs
+git clone https://github.com/idkafael/marmari.git
+cd marmari
 ```
 
 ### 2. Instale as dependências
@@ -62,36 +62,29 @@ npm run dev
 
 Acesse: http://localhost:3000
 
-## 🚀 Deploy
+## 🚀 Deploy na Netlify
 
-### Deploy na Vercel (Recomendado)
+**📖 Siga o guia completo:** [NETLIFY-DEPLOY.md](NETLIFY-DEPLOY.md)
+
+### Deploy Rápido
 
 1. **Conecte ao GitHub:**
-   - Faça push deste repositório para o GitHub
-   - Vá em [vercel.com](https://vercel.com)
-   - Clique em "New Project"
-   - Importe seu repositório do GitHub
+   - Vá em [netlify.com](https://netlify.com)
+   - Clique em "Add new site" → "Import an existing project"
+   - Selecione o repositório **idkafael/marmari**
 
 2. **Configure Environment Variables:**
-   - Vá em Settings → Environment Variables
+   - Vá em "Show advanced" → "Add environment variables"
    - Adicione todas as variáveis do `.env.local`
-   - Values devem ser os tokens reais (não os placeholders)
 
-3. **Deploy Automático:**
-   - A cada push no GitHub, a Vercel faz deploy automaticamente
+3. **Deploy:**
+   - Clique em "Deploy site"
+   - Aguarde o build (~3-4 minutos)
+   - Teste o site funcionando
 
-### Deploy Manual
-
-```bash
-# Build do projeto
-npm run build
-
-# Executar produção localmente
-npm start
-
-# Ou fazer deploy na Vercel via CLI
-npx vercel
-```
+### URLs
+- **Repositório**: https://github.com/idkafael/marmari
+- **Deploy**: https://marmari.netlify.app
 
 ## 🔐 Segurança
 
