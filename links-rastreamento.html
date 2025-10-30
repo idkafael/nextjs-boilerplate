@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Links de Rastreamento - Privacy</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: "Inter", sans-serif; }
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <!-- Header -->
+    <div class="gradient-bg text-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <h1 class="text-2xl font-bold">🔗 Gerador de Links de Rastreamento</h1>
+                <a href="remarketing.html" class="bg-white text-purple-600 px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors">
+                    ← Voltar ao Painel
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Conteúdo Principal -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Gerador de Links -->
+        <div class="bg-white rounded-lg shadow mb-8">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900">🛠️ Gerar Link Personalizado</h3>
+            </div>
+            <div class="p-6">
+                <form id="linkForm" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">URL Base</label>
+                            <input type="url" id="urlBase" value="https://seudominio.com" 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Fonte (utm_source)</label>
+                            <select id="fonte" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                <option value="google">Google</option>
+                                <option value="facebook">Facebook</option>
+                                <option value="instagram">Instagram</option>
+                                <option value="linktree">Linktree</option>
+                                <option value="tiktok">TikTok</option>
+                                <option value="twitter">Twitter</option>
+                                <option value="youtube">YouTube</option>
+                                <option value="linkedin">LinkedIn</option>
+                                <option value="whatsapp">WhatsApp</option>
+                                <option value="telegram">Telegram</option>
+                                <option value="email">Email</option>
+                                <option value="sms">SMS</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Meio (utm_medium)</label>
+                            <select id="meio" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                <option value="cpc">CPC (Tráfego Pago)</option>
+                                <option value="social">Social (Orgânico)</option>
+                                <option value="linktree">Linktree</option>
+                                <option value="email">Email Marketing</option>
+                                <option value="sms">SMS Marketing</option>
+                                <option value="referral">Indicação</option>
+                                <option value="organic">Orgânico</option>
+                                <option value="display">Display</option>
+                                <option value="video">Vídeo</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Campanha (utm_campaign)</label>
+                            <input type="text" id="campanha" placeholder="ex: black_friday_2024" 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Conteúdo (utm_content)</label>
+                            <input type="text" id="conteudo" placeholder="ex: banner_principal" 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Termo (utm_term)</label>
+                            <input type="text" id="termo" placeholder="ex: curso_privacy" 
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="w-full bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-purple-700 transition-colors">
+                        🔗 Gerar Link de Rastreamento
+                    </button>
+                </form>
+                
+                <div id="linkGerado" class="mt-6 p-4 bg-gray-50 rounded-lg hidden">
+                    <h4 class="font-medium text-gray-900 mb-2">Link Gerado:</h4>
+                    <div class="flex items-center space-x-2">
+                        <input type="text" id="linkResultado" readonly 
+                               class="flex-1 px-3 py-2 border border-gray-300 rounded-md bg-white">
+                        <button onclick="copiarLink()" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-colors">
+                            📋 Copiar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Exemplos de Links -->
+        <div class="bg-white rounded-lg shadow">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900">📋 Exemplos de Links de Rastreamento</h3>
+            </div>
+            <div class="p-6">
+                <div class="space-y-6">
+                    <!-- Google Ads -->
+                    <div class="border border-gray-200 rounded-lg p-4">
+                        <h4 class="font-medium text-gray-900 mb-2">🔍 Google Ads</h4>
+                        <p class="text-sm text-gray-600 mb-2">Tráfego pago do Google</p>
+                        <div class="bg-gray-50 p-3 rounded text-sm font-mono break-all">
+                            https://seudominio.com?utm_source=google&utm_medium=cpc&utm_campaign=curso_privacy&utm_content=banner_principal&utm_term=privacy_protection
+                        </div>
+                    </div>
+
+                    <!-- Facebook Ads -->
+                    <div class="border border-gray-200 rounded-lg p-4">
+                        <h4 class="font-medium text-gray-900 mb-2">📘 Facebook Ads</h4>
+                        <p class="text-sm text-gray-600 mb-2">Tráfego pago do Facebook</p>
+                        <div class="bg-gray-50 p-3 rounded text-sm font-mono break-all">
+                            https://seudominio.com?utm_source=facebook&utm_medium=cpc&utm_campaign=black_friday&utm_content=video_ads&utm_term=privacy_course
+                        </div>
+                    </div>
+
+                    <!-- Instagram Orgânico -->
+                    <div class="border border-gray-200 rounded-lg p-4">
+                        <h4 class="font-medium text-gray-900 mb-2">📸 Instagram Orgânico</h4>
+                        <p class="text-sm text-gray-600 mb-2">Posts orgânicos no Instagram</p>
+                        <div class="bg-gray-50 p-3 rounded text-sm font-mono break-all">
+                            https://seudominio.com?utm_source=instagram&utm_medium=social&utm_campaign=stories_privacy&utm_content=story_highlight
+                        </div>
+                    </div>
+
+                    <!-- Instagram via Linktree -->
+                    <div class="border border-gray-200 rounded-lg p-4">
+                        <h4 class="font-medium text-gray-900 mb-2">🔗 Instagram via Linktree</h4>
+                        <p class="text-sm text-gray-600 mb-2">Link da bio do Instagram → Linktree → Seu site</p>
+                        <div class="bg-gray-50 p-3 rounded text-sm font-mono break-all">
+                            https://seudominio.com?utm_source=linktree&utm_medium=linktree&utm_campaign=instagram_bio&utm_content=linktree_link
+                        </div>
+                    </div>
+
+                    <!-- TikTok Ads -->
+                    <div class="border border-gray-200 rounded-lg p-4">
+                        <h4 class="font-medium text-gray-900 mb-2">🎵 TikTok Ads</h4>
+                        <p class="text-sm text-gray-600 mb-2">Tráfego pago do TikTok</p>
+                        <div class="bg-gray-50 p-3 rounded text-sm font-mono break-all">
+                            https://seudominio.com?utm_source=tiktok&utm_medium=cpc&utm_campaign=privacy_trend&utm_content=video_creative&utm_term=privacy_tips
+                        </div>
+                    </div>
+
+                    <!-- Email Marketing -->
+                    <div class="border border-gray-200 rounded-lg p-4">
+                        <h4 class="font-medium text-gray-900 mb-2">📧 Email Marketing</h4>
+                        <p class="text-sm text-gray-600 mb-2">Campanhas de email</p>
+                        <div class="bg-gray-50 p-3 rounded text-sm font-mono break-all">
+                            https://seudominio.com?utm_source=email&utm_medium=email&utm_campaign=newsletter_privacy&utm_content=cta_button&utm_term=privacy_newsletter
+                        </div>
+                    </div>
+
+                    <!-- WhatsApp -->
+                    <div class="border border-gray-200 rounded-lg p-4">
+                        <h4 class="font-medium text-gray-900 mb-2">💬 WhatsApp</h4>
+                        <p class="text-sm text-gray-600 mb-2">Links compartilhados no WhatsApp</p>
+                        <div class="bg-gray-50 p-3 rounded text-sm font-mono break-all">
+                            https://seudominio.com?utm_source=whatsapp&utm_medium=messaging&utm_campaign=grupo_privacy&utm_content=link_compartilhado
+                        </div>
+                    </div>
+
+                    <!-- YouTube -->
+                    <div class="border border-gray-200 rounded-lg p-4">
+                        <h4 class="font-medium text-gray-900 mb-2">📺 YouTube</h4>
+                        <p class="text-sm text-gray-600 mb-2">Vídeos do YouTube</p>
+                        <div class="bg-gray-50 p-3 rounded text-sm font-mono break-all">
+                            https://seudominio.com?utm_source=youtube&utm_medium=video&utm_campaign=privacy_tutorial&utm_content=description_link&utm_term=privacy_video
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dicas de Uso -->
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mt-8">
+            <h3 class="text-lg font-medium text-blue-900 mb-4">💡 Dicas de Uso</h3>
+            <ul class="space-y-2 text-sm text-blue-800">
+                <li>• <strong>utm_source:</strong> Identifica a plataforma (google, facebook, instagram, etc.)</li>
+                <li>• <strong>utm_medium:</strong> Identifica o tipo de tráfego (cpc, social, email, etc.)</li>
+                <li>• <strong>utm_campaign:</strong> Nome da campanha específica</li>
+                <li>• <strong>utm_content:</strong> Identifica o elemento específico (banner, botão, etc.)</li>
+                <li>• <strong>utm_term:</strong> Palavra-chave ou termo específico</li>
+                <li>• Use nomes descritivos e consistentes para facilitar a análise</li>
+                <li>• Teste diferentes combinações para otimizar suas campanhas</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/lead-tracking.js"></script>
+    <script>
+        // Gerar link de rastreamento
+        document.getElementById('linkForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const urlBase = document.getElementById('urlBase').value;
+            const fonte = document.getElementById('fonte').value;
+            const meio = document.getElementById('meio').value;
+            const campanha = document.getElementById('campanha').value;
+            const conteudo = document.getElementById('conteudo').value;
+            const termo = document.getElementById('termo').value;
+            
+            if (!urlBase) {
+                alert('Por favor, insira uma URL base válida');
+                return;
+            }
+            
+            const link = LeadTracking.criarLinkRastreamento(urlBase, fonte, meio, campanha, conteudo, termo);
+            
+            document.getElementById('linkResultado').value = link;
+            document.getElementById('linkGerado').classList.remove('hidden');
+        });
+        
+        // Copiar link
+        function copiarLink() {
+            const linkInput = document.getElementById('linkResultado');
+            linkInput.select();
+            linkInput.setSelectionRange(0, 99999);
+            
+            try {
+                document.execCommand('copy');
+                alert('Link copiado para a área de transferência!');
+            } catch (err) {
+                console.error('Erro ao copiar:', err);
+                alert('Erro ao copiar. Selecione o texto e copie manualmente.');
+            }
+        }
+    </script>
+</body>
+</html>

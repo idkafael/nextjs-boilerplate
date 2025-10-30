@@ -1,0 +1,227 @@
+{
+  "version": "1.0.0",
+  "clientes": [
+    {
+      "id": "cliente_001",
+      "nome": "Ana Silva Santos",
+      "email": "ana.silva@email.com",
+      "telefone": "(11) 99999-1234",
+      "transactionId": "PIX_20250110_001",
+      "valor": 19.90,
+      "status": "paid",
+      "timestamp": "2025-01-10T10:30:00.000Z",
+      "ultimoAcesso": "2025-01-10T14:20:00.000Z",
+      "origem": "instagram",
+      "tags": ["convertido", "vip", "pago"],
+      "observacoes": "Cliente muito engajada, sempre interage com o conteúdo"
+    },
+    {
+      "id": "cliente_002", 
+      "nome": "Carlos Eduardo Oliveira",
+      "email": "carlos.eduardo@hotmail.com",
+      "telefone": "(21) 98888-5678",
+      "transactionId": "PIX_20250109_002",
+      "valor": 19.90,
+      "status": "paid",
+      "timestamp": "2025-01-09T15:45:00.000Z",
+      "ultimoAcesso": "2025-01-10T12:15:00.000Z",
+      "origem": "facebook",
+      "tags": ["convertido", "pago", "interessado"],
+      "observacoes": "Primeira compra, demonstrou interesse em mais conteúdos"
+    },
+    {
+      "id": "cliente_003",
+      "nome": "Mariana Costa Lima", 
+      "email": "mariana.costa@gmail.com",
+      "telefone": "(31) 97777-9012",
+      "transactionId": "PIX_20250108_003",
+      "valor": 19.90,
+      "status": "paid",
+      "timestamp": "2025-01-08T09:20:00.000Z",
+      "ultimoAcesso": "2025-01-10T16:30:00.000Z",
+      "origem": "site",
+      "tags": ["convertido", "vip", "pago", "frequente"],
+      "observacoes": "Cliente recorrente, já fez várias compras"
+    },
+    {
+      "id": "cliente_004",
+      "nome": "Roberto Almeida Souza",
+      "email": "roberto.almeida@yahoo.com", 
+      "telefone": "(41) 96666-3456",
+      "transactionId": "PIX_20250110_004",
+      "valor": 19.90,
+      "status": "pending",
+      "timestamp": "2025-01-10T11:15:00.000Z",
+      "ultimoAcesso": "2025-01-10T11:15:00.000Z",
+      "origem": "tiktok",
+      "tags": ["interessado", "pendente"],
+      "observacoes": "Pagamento pendente, aguardando confirmação"
+    },
+    {
+      "id": "cliente_005",
+      "nome": "Juliana Ferreira Rocha",
+      "email": "juliana.ferreira@outlook.com",
+      "telefone": "(51) 95555-7890", 
+      "transactionId": "PIX_20250107_005",
+      "valor": 19.90,
+      "status": "paid",
+      "timestamp": "2025-01-07T14:30:00.000Z",
+      "ultimoAcesso": "2025-01-10T13:45:00.000Z",
+      "origem": "instagram",
+      "tags": ["convertido", "pago", "nova"],
+      "observacoes": "Nova cliente, muito satisfeita com o conteúdo"
+    },
+    {
+      "id": "cliente_006",
+      "nome": "Fernanda Rodrigues",
+      "email": "fernanda.rodrigues@email.com",
+      "telefone": "(11) 94444-1111",
+      "transactionId": "PIX_20250106_006", 
+      "valor": 19.90,
+      "status": "paid",
+      "timestamp": "2025-01-06T16:20:00.000Z",
+      "ultimoAcesso": "2025-01-10T10:30:00.000Z",
+      "origem": "facebook",
+      "tags": ["convertido", "pago", "engajada"],
+      "observacoes": "Cliente ativa nas redes sociais, compartilha conteúdo"
+    },
+    {
+      "id": "cliente_007",
+      "nome": "Lucas Mendes Silva",
+      "email": "lucas.mendes@gmail.com",
+      "telefone": "(21) 93333-2222",
+      "transactionId": "PIX_20250105_007",
+      "valor": 19.90,
+      "status": "paid", 
+      "timestamp": "2025-01-05T13:10:00.000Z",
+      "ultimoAcesso": "2025-01-09T18:45:00.000Z",
+      "origem": "site",
+      "tags": ["convertido", "pago", "frequente"],
+      "observacoes": "Cliente fiel, sempre volta para mais conteúdo"
+    },
+    {
+      "id": "cliente_008",
+      "nome": "Camila Santos Oliveira",
+      "email": "camila.santos@hotmail.com",
+      "telefone": "(31) 92222-3333",
+      "transactionId": "PIX_20250104_008",
+      "valor": 19.90,
+      "status": "paid",
+      "timestamp": "2025-01-04T11:45:00.000Z", 
+      "ultimoAcesso": "2025-01-10T15:20:00.000Z",
+      "origem": "instagram",
+      "tags": ["convertido", "vip", "pago"],
+      "observacoes": "Cliente premium, muito satisfeita com o atendimento"
+    },
+    {
+      "id": "cliente_009",
+      "nome": "Diego Costa Pereira",
+      "email": "diego.costa@yahoo.com",
+      "telefone": "(41) 91111-4444",
+      "transactionId": "PIX_20250103_009",
+      "valor": 19.90,
+      "status": "paid",
+      "timestamp": "2025-01-03T08:30:00.000Z",
+      "ultimoAcesso": "2025-01-08T20:15:00.000Z",
+      "origem": "tiktok",
+      "tags": ["convertido", "pago", "jovem"],
+      "observacoes": "Cliente jovem, muito ativo no TikTok"
+    },
+    {
+      "id": "cliente_010",
+      "nome": "Patricia Alves Lima",
+      "email": "patricia.alves@outlook.com",
+      "telefone": "(51) 90000-5555",
+      "transactionId": "PIX_20250102_010",
+      "valor": 19.90,
+      "status": "paid",
+      "timestamp": "2025-01-02T17:25:00.000Z",
+      "ultimoAcesso": "2025-01-10T09:40:00.000Z",
+      "origem": "facebook",
+      "tags": ["convertido", "pago", "mature"],
+      "observacoes": "Cliente madura, valoriza conteúdo de qualidade"
+    }
+  ],
+  "campanhas": [],
+  "logs": [
+    {
+      "id": "log_001",
+      "clienteId": "cliente_001",
+      "acao": "cliente_criado",
+      "timestamp": "2025-01-10T10:30:00.000Z",
+      "detalhes": "Cliente criado: Ana Silva Santos",
+      "usuario": "sistema",
+      "campanhaId": null
+    },
+    {
+      "id": "log_002", 
+      "clienteId": "cliente_002",
+      "acao": "cliente_criado",
+      "timestamp": "2025-01-09T15:45:00.000Z",
+      "detalhes": "Cliente criado: Carlos Eduardo Oliveira",
+      "usuario": "sistema",
+      "campanhaId": null
+    },
+    {
+      "id": "log_003",
+      "clienteId": "cliente_003", 
+      "acao": "cliente_criado",
+      "timestamp": "2025-01-08T09:20:00.000Z",
+      "detalhes": "Cliente criado: Mariana Costa Lima",
+      "usuario": "sistema",
+      "campanhaId": null
+    },
+    {
+      "id": "log_004",
+      "clienteId": "cliente_004",
+      "acao": "cliente_criado", 
+      "timestamp": "2025-01-10T11:15:00.000Z",
+      "detalhes": "Cliente criado: Roberto Almeida Souza",
+      "usuario": "sistema",
+      "campanhaId": null
+    },
+    {
+      "id": "log_005",
+      "clienteId": "cliente_005",
+      "acao": "cliente_criado",
+      "timestamp": "2025-01-07T14:30:00.000Z",
+      "detalhes": "Cliente criado: Juliana Ferreira Rocha",
+      "usuario": "sistema",
+      "campanhaId": null
+    },
+    {
+      "id": "log_006",
+      "clienteId": "cliente_001",
+      "acao": "contato_whatsapp",
+      "timestamp": "2025-01-10T14:20:00.000Z",
+      "detalhes": "Cliente contatado via WhatsApp: Ana Silva Santos",
+      "usuario": "admin",
+      "campanhaId": null
+    },
+    {
+      "id": "log_007",
+      "clienteId": "cliente_002",
+      "acao": "tag_adicionada",
+      "timestamp": "2025-01-09T16:30:00.000Z",
+      "detalhes": "Tag \"interessado\" adicionada ao cliente Carlos Eduardo Oliveira",
+      "usuario": "admin",
+      "campanhaId": null
+    },
+    {
+      "id": "log_008",
+      "clienteId": "cliente_003",
+      "acao": "contato_whatsapp",
+      "timestamp": "2025-01-08T10:15:00.000Z",
+      "detalhes": "Cliente contatado via WhatsApp: Mariana Costa Lima",
+      "usuario": "admin",
+      "campanhaId": null
+    }
+  ],
+  "estatisticas": {
+    "totalClientes": 10,
+    "receitaTotal": 199.00,
+    "conversao": 9,
+    "ultimaAtualizacao": "2025-01-10T16:30:00.000Z"
+  }
+}
+
