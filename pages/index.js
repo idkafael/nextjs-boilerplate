@@ -293,6 +293,7 @@ export default function Home() {
                 loop
                 playsInline
                 preload="metadata" // Carregar apenas metadados inicialmente
+                poster="https://i.imgur.com/wiNPdKN.jpg" // Thumbnail do Imgur para otimização
               >
                 <source src="/images/centro.mp4" type="video/mp4" />
                 Seu navegador não suporta vídeos HTML5.

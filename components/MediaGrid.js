@@ -5,18 +5,18 @@ export default function MediaGrid() {
   const [playingVideos, setPlayingVideos] = useState({});
   const [loadedVideos, setLoadedVideos] = useState({});
   
-  // Media com thumbnails/previews
-  // Se quiser usar Imgur, substitua os paths por URLs do Imgur
+  // Media com thumbnails/previews do Imgur
+  // URLs do Imgur para otimização de performance
   const media = [
-    { src: '/images/lateral-1.mp4', type: 'video', poster: '/images/lateral-1-poster.jpg' },
-    { src: '/images/lateral-2.mp4', type: 'video', poster: '/images/lateral-2-poster.jpg' },
-    { src: '/images/lateral-3.jpg', type: 'image' },
-    { src: '/images/lateral-4.mp4', type: 'video', poster: '/images/lateral-4-poster.jpg' },
-    { src: '/images/lateral-5.mp4', type: 'video', poster: '/images/lateral-5-poster.jpg' },
-    { src: '/images/lateral-6.mp4', type: 'video', poster: '/images/lateral-6-poster.jpg' },
-    { src: '/images/lateral-7.mp4', type: 'video', poster: '/images/lateral-7-poster.jpg' },
-    { src: '/images/lateral-8.mp4', type: 'video', poster: '/images/lateral-8-poster.jpg' },
-    { src: '/images/lateral-9.mp4', type: 'video', poster: '/images/lateral-9-poster.jpg' },
+    { src: '/images/lateral-1.mp4', type: 'video', poster: 'https://i.imgur.com/GYyY5PV.jpg' },
+    { src: '/images/lateral-2.mp4', type: 'video', poster: 'https://i.imgur.com/q7GscYv.jpg' },
+    { src: 'https://i.imgur.com/nwTUHEw.jpg', type: 'image' },
+    { src: '/images/lateral-4.mp4', type: 'video', poster: 'https://i.imgur.com/Urr2ZmU.jpg' },
+    { src: '/images/lateral-5.mp4', type: 'video', poster: 'https://i.imgur.com/8YiUC2u.jpg' },
+    { src: '/images/lateral-6.mp4', type: 'video', poster: 'https://i.imgur.com/E26zXLa.jpg' },
+    { src: '/images/lateral-7.mp4', type: 'video', poster: 'https://i.imgur.com/DazJ1FY.jpg' },
+    { src: '/images/lateral-8.mp4', type: 'video', poster: 'https://i.imgur.com/D4YmZku.jpg' },
+    { src: '/images/lateral-9.mp4', type: 'video', poster: 'https://i.imgur.com/g55aWMb.jpg' },
   ];
 
   // Lazy load vídeos apenas quando entrarem na viewport
