@@ -48,33 +48,45 @@ export default function MediaGrid() {
 
   const handleMouseEnter = (index) => {
     const video = videoRefs.current[`video-${index}`];
-    if (video) {
-      // Só carregar o vídeo quando hover (mobile não tem hover, então precisa de outra abordagem)
+    if (video && !video.dataset.keepPlaying) {
+      // Só reproduzir no hover se não estiver em modo "mantido" (por clique)
       if (!loadedVideos[index] && video.readyState === 0) {
         video.load();
         setLoadedVideos(prev => ({ ...prev, [index]: true }));
       }
       
-      if (video.paused) {
-        video.play().then(() => {
-          setPlayingVideos(prev => ({ ...prev, [index]: true }));
-        }).catch(err => {
-          console.log('Erro ao reproduzir vídeo:', err);
-          setPlayingVideos(prev => ({ ...prev, [index]: false }));
-        });
+      if (video.paused && !video.dataset.isPlaying) {
+        video.dataset.isPlaying = 'true'; // Marcar que está tentando reproduzir
+        const playPromise = video.play();
+        
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => {
+              setPlayingVideos(prev => ({ ...prev, [index]: true }));
+              video.dataset.isPlaying = 'false';
+            })
+            .catch(err => {
+              // Ignorar erros de abort (normal quando pausa enquanto está carregando)
+              if (err.name !== 'AbortError' && err.name !== 'NotAllowedError') {
+                console.log('Erro ao reproduzir vídeo:', err);
+              }
+              setPlayingVideos(prev => ({ ...prev, [index]: false }));
+              video.dataset.isPlaying = 'false';
+            });
+        }
       }
     }
   };
 
   const handleMouseLeave = (index) => {
-    // No mobile, não pausar ao sair do hover (mobile não tem hover de verdade)
-    // Deixar o vídeo continuar reproduzindo se foi iniciado por clique
+    // No mobile, não pausar ao sair do hover
     const video = videoRefs.current[`video-${index}`];
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     
     // Se for desktop e não estiver em modo "mantido" (por clique), pausar
-    if (!isMobile && video && !video.paused && !video.dataset.keepPlaying) {
-      video.pause();
+    if (!isMobile && video && !video.paused && !video.dataset.keepPlaying && video.dataset.isPlaying !== 'true') {
+      video.dataset.isPlaying = 'false';
+      video.pause().catch(() => {}); // Ignorar erros ao pausar
       video.currentTime = 0; // Resetar para o início
       setPlayingVideos(prev => ({ ...prev, [index]: false }));
     }
@@ -84,6 +96,9 @@ export default function MediaGrid() {
     const video = videoRefs.current[`video-${index}`];
     
     if (video && itemType === 'video') {
+      // Cancelar qualquer hover que esteja em andamento
+      video.dataset.isPlaying = 'false';
+      
       // Toggle play/pause ao clicar
       if (video.paused) {
         // Carregar vídeo se ainda não foi carregado
@@ -92,20 +107,38 @@ export default function MediaGrid() {
           setLoadedVideos(prev => ({ ...prev, [index]: true }));
         }
         
-        // Iniciar reprodução
-        video.play().then(() => {
-          setPlayingVideos(prev => ({ ...prev, [index]: true }));
-          video.dataset.keepPlaying = 'true'; // Marcar para manter reproduzindo
-        }).catch(err => {
-          console.log('Erro ao reproduzir vídeo:', err);
-          setPlayingVideos(prev => ({ ...prev, [index]: false }));
-        });
+        // Aguardar um pouco antes de iniciar para evitar conflitos
+        setTimeout(() => {
+          if (video && video.paused && !video.dataset.isPlaying) {
+            video.dataset.keepPlaying = 'true'; // Marcar para manter reproduzindo
+            video.dataset.isPlaying = 'true';
+            const playPromise = video.play();
+            
+            if (playPromise !== undefined) {
+              playPromise
+                .then(() => {
+                  setPlayingVideos(prev => ({ ...prev, [index]: true }));
+                  video.dataset.isPlaying = 'false';
+                })
+                .catch(err => {
+                  // Ignorar erros de abort
+                  if (err.name !== 'AbortError' && err.name !== 'NotAllowedError') {
+                    console.log('Erro ao reproduzir vídeo:', err);
+                  }
+                  setPlayingVideos(prev => ({ ...prev, [index]: false }));
+                  video.dataset.keepPlaying = 'false';
+                  video.dataset.isPlaying = 'false';
+                });
+            }
+          }
+        }, 100); // Pequeno delay para evitar conflitos
       } else {
         // Pausar se já está reproduzindo
-        video.pause();
+        video.dataset.keepPlaying = 'false';
+        video.dataset.isPlaying = 'false';
+        video.pause().catch(() => {}); // Ignorar erros
         video.currentTime = 0;
         setPlayingVideos(prev => ({ ...prev, [index]: false }));
-        video.dataset.keepPlaying = 'false';
       }
     }
   };
