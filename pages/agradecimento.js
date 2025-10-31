@@ -253,23 +253,29 @@ export default function Agradecimento() {
 
       {/* Facebook Pixel */}
       {pixelId && pixelId !== 'SEU_PIXEL_ID_AQUI' && (
-        <Script 
-          id="fb-pixel-agradecimento" 
-          strategy="afterInteractive"
-        >
-          {`
-            !function(f,b,e,v,n,t,s)
-            {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-            n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-            if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-            n.queue=[];t=b.createElement(e);t.async=!0;
-            t.src=v;s=b.getElementsByTagName(e)[0];
-            s.parentNode.insertBefore(t,s)}(window, document,'script',
-            'https://connect.facebook.net/en_US/fbevents.js');
-            fbq('init', '${pixelId}');
-            fbq('track', 'PageView');
-          `}
-        </Script>
+        <>
+          <Script 
+            src="https://connect.facebook.net/en_US/fbevents.js"
+            strategy="afterInteractive"
+            onError={(e) => {
+              console.info('ℹ️ Facebook Pixel bloqueado por AdBlock ou extensão');
+            }}
+          />
+          <Script 
+            id="fb-pixel-init-agradecimento" 
+            strategy="afterInteractive"
+            dangerouslySetInnerHTML={{
+              __html: `
+                if (typeof fbq === 'undefined') {
+                  window.fbq = function() {};
+                  window.fbq.queue = [];
+                }
+                fbq('init', '${pixelId}');
+                fbq('track', 'PageView');
+              `
+            }}
+          />
+        </>
       )}
 
       {/* Scripts do Formulário */}
