@@ -67,11 +67,46 @@ export default function MediaGrid() {
   };
 
   const handleMouseLeave = (index) => {
+    // No mobile, não pausar ao sair do hover (mobile não tem hover de verdade)
+    // Deixar o vídeo continuar reproduzindo se foi iniciado por clique
     const video = videoRefs.current[`video-${index}`];
-    if (video && !video.paused) {
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
+    // Se for desktop e não estiver em modo "mantido" (por clique), pausar
+    if (!isMobile && video && !video.paused && !video.dataset.keepPlaying) {
       video.pause();
       video.currentTime = 0; // Resetar para o início
       setPlayingVideos(prev => ({ ...prev, [index]: false }));
+    }
+  };
+
+  const handleClick = (index, itemType) => {
+    const video = videoRefs.current[`video-${index}`];
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
+    if (video && itemType === 'video') {
+      if (isMobile || !video.paused) {
+        // No mobile ou se já está reproduzindo, toggle play/pause
+        if (video.paused) {
+          if (!loadedVideos[index] && video.readyState === 0) {
+            video.load();
+            setLoadedVideos(prev => ({ ...prev, [index]: true }));
+          }
+          
+          video.play().then(() => {
+            setPlayingVideos(prev => ({ ...prev, [index]: true }));
+            video.dataset.keepPlaying = 'true'; // Marcar para manter reproduzindo
+          }).catch(err => {
+            console.log('Erro ao reproduzir vídeo:', err);
+          });
+        } else {
+          // Se clicar novamente, pausar
+          video.pause();
+          video.currentTime = 0;
+          setPlayingVideos(prev => ({ ...prev, [index]: false }));
+          video.dataset.keepPlaying = 'false';
+        }
+      }
     }
   };
 
@@ -85,9 +120,10 @@ export default function MediaGrid() {
           onMouseEnter={() => handleMouseEnter(index)}
           onMouseLeave={() => handleMouseLeave(index)}
           onClick={(e) => {
-            // Prevenir qualquer ação ao clicar nas mídias
             e.preventDefault();
             e.stopPropagation();
+            // No mobile, permitir clique para togglear vídeo
+            handleClick(index, item.type);
           }}
         >
           {item.type === 'video' ? (
