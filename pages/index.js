@@ -9,7 +9,7 @@ export default function Home() {
   const [modalAberto, setModalAberto] = useState(false);
   const [activeTab, setActiveTab] = useState('posts');
   const [currentValue, setCurrentValue] = useState(19.90);
-  const [currentPlan, setCurrentPlan] = useState('Vitalício');
+  const [currentPlan, setCurrentPlan] = useState('1 Mês');
   
   useEffect(() => {
     setPixelId(process.env.NEXT_PUBLIC_FACEBOOK_PIXEL_ID || 'SEU_PIXEL_ID_AQUI');
@@ -208,8 +208,8 @@ export default function Home() {
           <div className="mt-3">
             <h6 className="text-lg font-bold text-gray-800 mb-2">Assinaturas</h6>
             
-            <button onClick={() => handlePayment(19.90, 'Vitalício')} className="w-full subscription-gradient text-black py-4 px-6 rounded-2xl font-medium transition-all mb-2 flex justify-between items-center shadow-sm">
-              <span>Vitalício</span>
+            <button onClick={() => handlePayment(19.90, '1 Mês')} className="w-full subscription-gradient text-black py-4 px-6 rounded-2xl font-medium transition-all mb-2 flex justify-between items-center shadow-sm">
+              <span>1 Mês</span>
               <span>R$ 19,90</span>
             </button>
           </div>
@@ -359,7 +359,7 @@ export default function Home() {
             <MediaGrid />
 
             <div className="text-center">
-              <button onClick={() => handlePayment(19.90, 'Vitalício')} className="w-full bg-gradient-to-r from-orange-500 to-pink-500 text-white py-3 px-6 rounded-lg font-semibold hover:from-orange-600 hover:to-pink-600 transition-all">
+              <button onClick={() => handlePayment(19.90, '1 Mês')} className="w-full bg-gradient-to-r from-orange-500 to-pink-500 text-white py-3 px-6 rounded-lg font-semibold hover:from-orange-600 hover:to-pink-600 transition-all">
                 🔒 Desbloquear todas as mídias
               </button>
             </div>
