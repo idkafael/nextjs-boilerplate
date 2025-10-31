@@ -299,19 +299,13 @@ export default function Home() {
 
             {/* Locked Content Area */}
             <div className="relative rounded-2xl overflow-hidden mb-6" style={{ aspectRatio: '16/9' }}>
-              <video 
+              <img 
                 className="w-full h-full object-cover" 
                 style={{ filter: 'blur(8px)' }} 
-                autoPlay 
-                muted 
-                loop
-                playsInline
-                preload="metadata" // Carregar apenas metadados inicialmente
-                poster="https://i.imgur.com/wiNPdKN.jpg" // Thumbnail do Imgur para otimização
-              >
-                <source src="/images/centro.mp4" type="video/mp4" />
-                Seu navegador não suporta vídeos HTML5.
-              </video>
+                src="https://i.imgur.com/wiNPdKN.jpg"
+                alt="Conteúdo bloqueado"
+                loading="eager"
+              />
               
               <div className="absolute inset-0 bg-black bg-opacity-50"></div>
               

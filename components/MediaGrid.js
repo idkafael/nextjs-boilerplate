@@ -5,18 +5,17 @@ export default function MediaGrid() {
   const [playingVideos, setPlayingVideos] = useState({});
   const [loadedVideos, setLoadedVideos] = useState({});
   
-  // Media com thumbnails/previews do Imgur
-  // URLs do Imgur para otimização de performance
+  // Media com imagens do Imgur - leves e otimizadas
   const media = [
-    { src: '/images/lateral-1.mp4', type: 'video', poster: 'https://i.imgur.com/GYyY5PV.jpg' },
-    { src: '/images/lateral-2.mp4', type: 'video', poster: 'https://i.imgur.com/q7GscYv.jpg' },
+    { src: 'https://i.imgur.com/GYyY5PV.jpg', type: 'image' },
+    { src: 'https://i.imgur.com/q7GscYv.jpg', type: 'image' },
     { src: 'https://i.imgur.com/nwTUHEw.jpg', type: 'image' },
-    { src: '/images/lateral-4.mp4', type: 'video', poster: 'https://i.imgur.com/Urr2ZmU.jpg' },
-    { src: '/images/lateral-5.mp4', type: 'video', poster: 'https://i.imgur.com/8YiUC2u.jpg' },
-    { src: '/images/lateral-6.mp4', type: 'video', poster: 'https://i.imgur.com/E26zXLa.jpg' },
-    { src: '/images/lateral-7.mp4', type: 'video', poster: 'https://i.imgur.com/DazJ1FY.jpg' },
-    { src: '/images/lateral-8.mp4', type: 'video', poster: 'https://i.imgur.com/D4YmZku.jpg' },
-    { src: '/images/lateral-9.mp4', type: 'video', poster: 'https://i.imgur.com/g55aWMb.jpg' },
+    { src: 'https://i.imgur.com/Urr2ZmU.jpg', type: 'image' },
+    { src: 'https://i.imgur.com/8YiUC2u.jpg', type: 'image' },
+    { src: 'https://i.imgur.com/E26zXLa.jpg', type: 'image' },
+    { src: 'https://i.imgur.com/DazJ1FY.jpg', type: 'image' },
+    { src: 'https://i.imgur.com/D4YmZku.jpg', type: 'image' },
+    { src: 'https://i.imgur.com/g55aWMb.jpg', type: 'image' },
   ];
 
   // Lazy load vídeos apenas quando entrarem na viewport
@@ -192,9 +191,9 @@ export default function MediaGrid() {
                 preload="none" // Não carregar até necessário
                 poster={item.poster || item.src.replace('.mp4', '.jpg')} // Fallback para poster
               >
-                <source src={item.src} type="video/mp4" />
-                Seu navegador não suporta vídeos HTML5.
-              </video>
+              <source src={item.src} type="video/mp4" />
+              Seu navegador não suporta vídeos HTML5.
+            </video>
             </>
           ) : (
             <img 
@@ -217,9 +216,9 @@ export default function MediaGrid() {
               <svg className={`w-8 h-8 text-white transition-opacity duration-300 ${
                 playingVideos[index] ? 'opacity-50' : 'opacity-70'
               }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
-              </svg>
-            </div>
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+            </svg>
+          </div>
           )}
         </div>
       ))}
