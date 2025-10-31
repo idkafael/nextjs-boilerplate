@@ -59,16 +59,21 @@ const PushinPayReal = {
       console.log('✅ PIX criado com sucesso:', data);
       
       // Exibir QR Code e código PIX
+      // Segundos a documentação da PushinPay:
+      // - qr_code_base64: Imagem do QR Code em base64
+      // - qr_code: Código PIX completo no padrão EMV
+      // - id: Identificador único da transação
+      
       if (data.qr_code_base64) {
         this.exibirQRCode(data.qr_code_base64);
       }
       
-      if (data.pix_code) {
-        this.exibirCodigoPix(data.pix_code);
+      if (data.qr_code) {
+        this.exibirCodigoPix(data.qr_code);
       }
       
-      if (data.transaction_id) {
-        this.estado.transactionId = data.transaction_id;
+      if (data.id) {
+        this.estado.transactionId = data.id;
         this.iniciarVerificacao();
       }
       
