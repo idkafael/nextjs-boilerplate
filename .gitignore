@@ -68,3 +68,6 @@ remarketing.html
 links-rastreamento.html
 database.json
 
+# Backups locais
+backup/
+
