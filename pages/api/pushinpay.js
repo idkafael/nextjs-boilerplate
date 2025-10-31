@@ -23,12 +23,13 @@ export default async function handler(req, res) {
       const { valor, plano } = req.body;
       
       // Validar valor
+      // PushinPay: valor mínimo é 50 centavos (segundo documentação)
       const valorFinal = valor || parseInt(process.env.PLANO_VITALICIO_19_90) || 1990;
       
-      if (!valorFinal || valorFinal < 100) {
+      if (!valorFinal || valorFinal < 50) {
         return res.status(400).json({ 
-          error: 'Valor inválido. O valor mínimo é R$ 1,00',
-          message: 'Valor inválido. O valor mínimo é R$ 1,00'
+          error: 'Valor inválido. O valor mínimo é R$ 0,50 (50 centavos)',
+          message: 'Valor inválido. O valor mínimo é R$ 0,50 (50 centavos)'
         });
       }
       
