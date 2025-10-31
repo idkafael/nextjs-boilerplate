@@ -89,9 +89,16 @@ const PushinPayReal = {
   
   exibirQRCode(qrCodeBase64) {
     const qrDiv = document.getElementById('qrCode');
-    if (qrDiv) {
-      qrDiv.innerHTML = `<img src="data:image/png;base64,${qrCodeBase64}" alt="QR Code PIX" class="mx-auto" />`;
+    if (qrDiv && qrCodeBase64) {
+      // Se já tem o prefixo data:, usar direto, senão adicionar
+      let imageSrc = qrCodeBase64;
+      if (!qrCodeBase64.startsWith('data:')) {
+        imageSrc = `data:image/png;base64,${qrCodeBase64}`;
+      }
+      qrDiv.innerHTML = `<img src="${imageSrc}" alt="QR Code PIX" class="mx-auto max-w-xs" style="max-width: 256px;" />`;
       console.log('✅ QR Code exibido');
+    } else {
+      console.warn('⚠️ QR Code base64 não disponível ou elemento qrCode não encontrado');
     }
   },
   
@@ -147,11 +154,21 @@ const PushinPayReal = {
         });
         
         if (!response.ok) {
-          console.error('Erro ao verificar pagamento:', response.status);
+          const errorData = await response.json().catch(() => ({}));
+          console.error('Erro ao verificar pagamento:', {
+            status: response.status,
+            error: errorData.error || errorData.message || 'Erro desconhecido'
+          });
+          
+          // Se for 404, pode ser que o endpoint ainda não esteja deployado
+          if (response.status === 404) {
+            console.warn('⚠️ Endpoint de verificação não encontrado. Aguardando deploy...');
+          }
           return;
         }
         
         const data = await response.json();
+        console.log('📊 Status do pagamento:', data.status);
         
         if (data.status === 'paid' || data.status === 'approved') {
           console.log('✅ Pagamento confirmado!');
