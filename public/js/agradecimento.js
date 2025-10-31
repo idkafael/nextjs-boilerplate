@@ -16,9 +16,9 @@
   }
   
   function init() {
-    // Evento Facebook Pixel - Purchase
-    if (typeof fbq !== 'undefined') {
-      try {
+    // Evento Facebook Pixel - Purchase (se disponível)
+    try {
+      if (typeof fbq !== 'undefined' && fbq) {
         fbq('track', 'Purchase', {
           value: 19.90,
           currency: 'BRL',
@@ -27,9 +27,9 @@
           transaction_id: transactionId
         });
         console.log('✅ Facebook Pixel Purchase event enviado');
-      } catch (error) {
-        console.info('ℹ️ Facebook Pixel não disponível (pode estar bloqueado por AdBlock)');
       }
+    } catch (error) {
+      // Silenciar erro - Facebook Pixel pode estar bloqueado
     }
     
     // Exibir ID da transação

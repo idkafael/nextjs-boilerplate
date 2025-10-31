@@ -1,15 +1,9 @@
 import Head from 'next/head';
 import Script from 'next/script';
-import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 
 export default function Agradecimento() {
   const router = useRouter();
-  const [pixelId, setPixelId] = useState('');
-
-  useEffect(() => {
-    setPixelId(process.env.NEXT_PUBLIC_FACEBOOK_PIXEL_ID || 'SEU_PIXEL_ID_AQUI');
-  }, []);
 
   return (
     <>
@@ -250,33 +244,6 @@ export default function Agradecimento() {
           </div>
         </div>
       </div>
-
-      {/* Facebook Pixel */}
-      {pixelId && pixelId !== 'SEU_PIXEL_ID_AQUI' && (
-        <>
-          <Script 
-            src="https://connect.facebook.net/en_US/fbevents.js"
-            strategy="afterInteractive"
-            onError={(e) => {
-              console.info('ℹ️ Facebook Pixel bloqueado por AdBlock ou extensão');
-            }}
-          />
-          <Script 
-            id="fb-pixel-init-agradecimento" 
-            strategy="afterInteractive"
-            dangerouslySetInnerHTML={{
-              __html: `
-                if (typeof fbq === 'undefined') {
-                  window.fbq = function() {};
-                  window.fbq.queue = [];
-                }
-                fbq('init', '${pixelId}');
-                fbq('track', 'PageView');
-              `
-            }}
-          />
-        </>
-      )}
 
       {/* Scripts do Formulário */}
       <Script src="/js/database.js" strategy="afterInteractive" />
