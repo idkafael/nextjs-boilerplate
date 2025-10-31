@@ -5,16 +5,18 @@ export default function MediaGrid() {
   const [playingVideos, setPlayingVideos] = useState({});
   const [loadedVideos, setLoadedVideos] = useState({});
   
+  // Media com thumbnails/previews
+  // Se quiser usar Imgur, substitua os paths por URLs do Imgur
   const media = [
-    { src: '/images/lateral-1.mp4', type: 'video' },
-    { src: '/images/lateral-2.mp4', type: 'video' },
+    { src: '/images/lateral-1.mp4', type: 'video', poster: '/images/lateral-1-poster.jpg' },
+    { src: '/images/lateral-2.mp4', type: 'video', poster: '/images/lateral-2-poster.jpg' },
     { src: '/images/lateral-3.jpg', type: 'image' },
-    { src: '/images/lateral-4.mp4', type: 'video' },
-    { src: '/images/lateral-5.mp4', type: 'video' },
-    { src: '/images/lateral-6.mp4', type: 'video' },
-    { src: '/images/lateral-7.mp4', type: 'video' },
-    { src: '/images/lateral-8.mp4', type: 'video' },
-    { src: '/images/lateral-9.mp4', type: 'video' },
+    { src: '/images/lateral-4.mp4', type: 'video', poster: '/images/lateral-4-poster.jpg' },
+    { src: '/images/lateral-5.mp4', type: 'video', poster: '/images/lateral-5-poster.jpg' },
+    { src: '/images/lateral-6.mp4', type: 'video', poster: '/images/lateral-6-poster.jpg' },
+    { src: '/images/lateral-7.mp4', type: 'video', poster: '/images/lateral-7-poster.jpg' },
+    { src: '/images/lateral-8.mp4', type: 'video', poster: '/images/lateral-8-poster.jpg' },
+    { src: '/images/lateral-9.mp4', type: 'video', poster: '/images/lateral-9-poster.jpg' },
   ];
 
   // Lazy load vídeos apenas quando entrarem na viewport
@@ -89,46 +91,63 @@ export default function MediaGrid() {
           }}
         >
           {item.type === 'video' ? (
-            <video 
-              ref={(el) => {
-                if (el) {
-                  videoRefs.current[`video-${index}`] = el;
-                }
-              }}
-              className="w-full h-full object-cover rounded-lg media-blur transition-all duration-300" 
-              muted 
-              loop
-              playsInline
-              preload="none" // Não carregar até necessário
-              loading="lazy" // Lazy loading nativo
-            >
-              <source src={item.src} type="video/mp4" />
-              Seu navegador não suporta vídeos HTML5.
-            </video>
+            <>
+              {/* Thumbnail/Preview - sempre visível */}
+              <img 
+                src={item.poster || item.src.replace('.mp4', '.jpg')} 
+                alt={`Preview ${index + 1}`}
+                className={`w-full h-full object-cover rounded-lg transition-opacity duration-300 ${
+                  playingVideos[index] ? 'opacity-0 absolute' : 'opacity-100'
+                }`}
+                loading="lazy"
+                onError={(e) => {
+                  // Se a imagem de preview não existir, tentar gerar do vídeo
+                  e.target.style.display = 'none';
+                }}
+              />
+              {/* Vídeo - só aparece quando reproduzindo */}
+              <video 
+                ref={(el) => {
+                  if (el) {
+                    videoRefs.current[`video-${index}`] = el;
+                  }
+                }}
+                className={`w-full h-full object-cover rounded-lg transition-opacity duration-300 ${
+                  playingVideos[index] ? 'opacity-100' : 'opacity-0 absolute top-0 left-0'
+                }`}
+                muted 
+                loop
+                playsInline
+                preload="none" // Não carregar até necessário
+                poster={item.poster || item.src.replace('.mp4', '.jpg')} // Fallback para poster
+              >
+                <source src={item.src} type="video/mp4" />
+                Seu navegador não suporta vídeos HTML5.
+              </video>
+            </>
           ) : (
             <img 
               src={item.src} 
               alt={`Media ${index + 1}`} 
-              className="w-full h-full object-cover rounded-lg media-blur transition-all duration-300" 
+              className="w-full h-full object-cover rounded-lg transition-all duration-300" 
               loading="lazy" // Lazy loading para imagens também
             />
           )}
+          {/* Overlay escuro - aparece apenas quando não está reproduzindo */}
           <div 
-            className="absolute inset-0 media-overlay rounded-lg transition-opacity duration-300" 
+            className="absolute inset-0 media-overlay rounded-lg transition-opacity duration-300 pointer-events-none" 
             style={{ 
-              opacity: item.type === 'video' && playingVideos[index] ? 0 : 1 
+              opacity: item.type === 'video' && playingVideos[index] ? 0 : 0.5 
             }}
           ></div>
-          <div 
-            className="absolute inset-0 flex items-center justify-center pointer-events-none play-icon" 
-            style={{ 
-              opacity: item.type === 'video' && playingVideos[index] ? 0 : 0.7 
-            }}
-          >
-            <svg className="w-8 h-8 text-white transition-opacity duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
-            </svg>
-          </div>
+          {/* Ícone de play - aparece apenas quando não está reproduzindo */}
+          {item.type === 'video' && !playingVideos[index] && (
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <svg className="w-8 h-8 text-white opacity-70 transition-opacity duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+              </svg>
+            </div>
+          )}
         </div>
       ))}
     </div>
