@@ -82,30 +82,30 @@ export default function MediaGrid() {
 
   const handleClick = (index, itemType) => {
     const video = videoRefs.current[`video-${index}`];
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     
     if (video && itemType === 'video') {
-      if (isMobile || !video.paused) {
-        // No mobile ou se já está reproduzindo, toggle play/pause
-        if (video.paused) {
-          if (!loadedVideos[index] && video.readyState === 0) {
-            video.load();
-            setLoadedVideos(prev => ({ ...prev, [index]: true }));
-          }
-          
-          video.play().then(() => {
-            setPlayingVideos(prev => ({ ...prev, [index]: true }));
-            video.dataset.keepPlaying = 'true'; // Marcar para manter reproduzindo
-          }).catch(err => {
-            console.log('Erro ao reproduzir vídeo:', err);
-          });
-        } else {
-          // Se clicar novamente, pausar
-          video.pause();
-          video.currentTime = 0;
-          setPlayingVideos(prev => ({ ...prev, [index]: false }));
-          video.dataset.keepPlaying = 'false';
+      // Toggle play/pause ao clicar
+      if (video.paused) {
+        // Carregar vídeo se ainda não foi carregado
+        if (!loadedVideos[index] && video.readyState === 0) {
+          video.load();
+          setLoadedVideos(prev => ({ ...prev, [index]: true }));
         }
+        
+        // Iniciar reprodução
+        video.play().then(() => {
+          setPlayingVideos(prev => ({ ...prev, [index]: true }));
+          video.dataset.keepPlaying = 'true'; // Marcar para manter reproduzindo
+        }).catch(err => {
+          console.log('Erro ao reproduzir vídeo:', err);
+          setPlayingVideos(prev => ({ ...prev, [index]: false }));
+        });
+      } else {
+        // Pausar se já está reproduzindo
+        video.pause();
+        video.currentTime = 0;
+        setPlayingVideos(prev => ({ ...prev, [index]: false }));
+        video.dataset.keepPlaying = 'false';
       }
     }
   };
@@ -141,16 +141,18 @@ export default function MediaGrid() {
                   e.target.style.display = 'none';
                 }}
               />
-              {/* Vídeo - só aparece quando reproduzindo */}
+              {/* Vídeo - só aparece quando reproduzindo, com blur reduzido */}
               <video 
                 ref={(el) => {
                   if (el) {
                     videoRefs.current[`video-${index}`] = el;
                   }
                 }}
-                className={`w-full h-full object-cover rounded-lg transition-opacity duration-300 ${
-                  playingVideos[index] ? 'opacity-100' : 'opacity-0 absolute top-0 left-0'
-                }`}
+                className={`w-full h-full object-cover rounded-lg transition-all duration-300 ${
+                  playingVideos[index] 
+                    ? 'opacity-100' 
+                    : 'opacity-0 absolute top-0 left-0'
+                } ${playingVideos[index] ? 'blur-0' : 'blur-5'}`}
                 muted 
                 loop
                 playsInline
@@ -169,17 +171,19 @@ export default function MediaGrid() {
               loading="lazy" // Lazy loading para imagens também
             />
           )}
-          {/* Overlay escuro - aparece apenas quando não está reproduzindo */}
+          {/* Overlay escuro - sempre visível, mas mais sutil quando reproduzindo */}
           <div 
             className="absolute inset-0 media-overlay rounded-lg transition-opacity duration-300 pointer-events-none" 
             style={{ 
-              opacity: item.type === 'video' && playingVideos[index] ? 0 : 0.5 
+              opacity: item.type === 'video' && playingVideos[index] ? 0.2 : 0.5 
             }}
           ></div>
-          {/* Ícone de play - aparece apenas quando não está reproduzindo */}
-          {item.type === 'video' && !playingVideos[index] && (
+          {/* Ícone de câmera - sempre visível quando é vídeo */}
+          {item.type === 'video' && (
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <svg className="w-8 h-8 text-white opacity-70 transition-opacity duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className={`w-8 h-8 text-white transition-opacity duration-300 ${
+                playingVideos[index] ? 'opacity-50' : 'opacity-70'
+              }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
               </svg>
             </div>
