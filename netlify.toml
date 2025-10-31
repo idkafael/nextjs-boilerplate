@@ -22,12 +22,26 @@
     Cache-Control = "public, max-age=31536000, immutable"
     X-Content-Type-Options = "nosniff"
 
-# Redirecionamentos (opcional)
+# Bloquear acesso direto a arquivos HTML originais
 [[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
-  conditions = {Country = ["US", "CA"]}
+  from = "/index.html"
+  to = "/404"
+  status = 404
+
+[[redirects]]
+  from = "/agradecimento.html"
+  to = "/404"
+  status = 404
+
+[[redirects]]
+  from = "/remarketing.html"
+  to = "/404"
+  status = 404
+
+[[redirects]]
+  from = "/links-rastreamento.html"
+  to = "/404"
+  status = 404
 
 # Variáveis de ambiente (valores padrão)
 [build.environment]
