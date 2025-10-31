@@ -30,9 +30,9 @@ const PushinPayReal = {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          value: this.estado.valorAtual,
-          webhook_url: this.config.webhookUrl,
-          split_rules: []
+          action: 'create-pix',
+          valor: this.estado.valorAtual,
+          plano: this.config.planoAtual
         })
       });
       
