@@ -3,10 +3,11 @@
   # Comandos de build do Next.js
   command = "npm run build"
   publish = ".next"
-
-# Plugins - Netlify Next.js runtime
-[plugins]
+  
+# Plugin Next.js - necessário para SSR e API routes funcionarem
+[[plugins]]
   package = "@netlify/plugin-nextjs"
+
 
 # Headers de segurança
 [[headers]]
