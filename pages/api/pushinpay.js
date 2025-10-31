@@ -87,27 +87,60 @@ export default async function handler(req, res) {
 
       // Verificar status do pagamento
       // Base URL: https://api.pushinpay.com.br/api
-      // Endpoint: /pix/{transactionId}
+      // Tentando diferentes variações do endpoint de consulta
       const apiBaseUrl = process.env.PUSHINPAY_API_URL || 'https://api.pushinpay.com.br/api';
-      const url = `${apiBaseUrl}/pix/${transactionId}`;
+      const endpoints = [
+        `/pix/${transactionId}`,           // /api/pix/{id}
+        `/v1/pix/${transactionId}`,         // /api/v1/pix/{id}
+        `/pix/${transactionId}/status`,     // /api/pix/{id}/status
+        `/transactions/${transactionId}`,  // /api/transactions/{id}
+      ];
       
-      console.log(`Consultando PIX: ${url}`);
+      let response = null;
+      let lastError = null;
       
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Accept': 'application/json',
-        },
-      });
+      // Tentar cada endpoint até encontrar um que funcione
+      for (const endpoint of endpoints) {
+        try {
+          const url = `${apiBaseUrl}${endpoint}`;
+          console.log(`Tentando consultar PIX: ${url}`);
+          
+          response = await fetch(url, {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Accept': 'application/json',
+            },
+          });
 
-      const data = await response.json();
-      
-      if (!response.ok) {
-        return res.status(response.status).json({ error: data.message || 'Erro ao verificar pagamento' });
+          const data = await response.json();
+          
+          if (response.ok) {
+            console.log(`✅ Endpoint de consulta funcionou: ${url}`);
+            return res.status(200).json(data);
+          } else if (response.status !== 404) {
+            // Se não for 404, esse pode ser o endpoint correto mas com erro diferente
+            console.error(`Endpoint ${url} retornou ${response.status}:`, data);
+            return res.status(response.status).json({ 
+              error: data.message || data.error || 'Erro ao verificar pagamento',
+              details: data
+            });
+          }
+          
+          lastError = data;
+        } catch (error) {
+          console.error(`Erro ao tentar endpoint ${endpoint}:`, error.message);
+          lastError = { message: error.message };
+        }
       }
-
-      return res.status(200).json(data);
+      
+      // Se nenhum endpoint funcionou, retornar erro
+      console.error('Nenhum endpoint de consulta da API PushinPay funcionou');
+      return res.status(404).json({ 
+        error: 'Endpoint de consulta da API PushinPay não encontrado. Verifique a documentação.',
+        message: 'Endpoint de consulta da API PushinPay não encontrado. Verifique a documentação.',
+        details: lastError
+      });
     }
 
     return res.status(400).json({ 
