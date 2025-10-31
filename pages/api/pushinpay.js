@@ -23,15 +23,17 @@ export default async function handler(req, res) {
       const { valor, plano } = req.body;
       
       // Criar PIX via PushinPay API
-      const response = await fetch('https://api.pushinpay.com.br/api/v1/pix', {
+      const response = await fetch('https://api.pushinpay.com.br/pix/cashIn', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          valor: valor || process.env.PLANO_VITALICIO_19_90 || 1990,
-          plano: plano || 'Vitalício',
+          value: valor || process.env.PLANO_VITALICIO_19_90 || 1990,
+          webhook_url: null,
+          split_rules: []
         }),
       });
 
@@ -52,10 +54,11 @@ export default async function handler(req, res) {
       }
 
       // Verificar status do pagamento
-      const response = await fetch(`https://api.pushinpay.com.br/api/v1/pix/${transactionId}`, {
+      const response = await fetch(`https://api.pushinpay.com.br/pix/${transactionId}`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json',
         },
       });
 
