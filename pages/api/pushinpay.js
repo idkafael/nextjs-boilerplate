@@ -43,7 +43,17 @@ export default async function handler(req, res) {
       const endpoint = '/pix/cashIn';
       const url = `${apiBaseUrl}${endpoint}`;
       
+      // Configurar URL do webhook
+      // A URL do webhook deve ser pública e acessível pela PushinPay
+      // Exemplo: https://seu-dominio.com/api/webhook-pushinpay
+      const webhookUrl = process.env.NEXT_PUBLIC_SITE_URL 
+        ? `${process.env.NEXT_PUBLIC_SITE_URL}/api/webhook-pushinpay`
+        : null;
+      
       console.log(`Chamando API PushinPay: ${url}`);
+      if (webhookUrl) {
+        console.log(`Webhook configurado: ${webhookUrl}`);
+      }
       
       const response = await fetch(url, {
         method: 'POST',
@@ -54,7 +64,7 @@ export default async function handler(req, res) {
         },
         body: JSON.stringify({
           value: valorFinal,
-          webhook_url: null,
+          webhook_url: webhookUrl, // URL do webhook para notificações
           split_rules: []
         }),
       });

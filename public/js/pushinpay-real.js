@@ -170,15 +170,52 @@ const PushinPayReal = {
         const data = await response.json();
         console.log('📊 Status do pagamento:', data.status);
         
-        if (data.status === 'paid' || data.status === 'approved') {
+        // Verificar se o pagamento foi confirmado
+        // Status possíveis: paid, approved, confirmed
+        if (data.status === 'paid' || data.status === 'approved' || data.status === 'confirmed') {
           console.log('✅ Pagamento confirmado!');
-          this.atualizarStatus('Pagamento confirmado! Redirecionando...');
+          this.atualizarStatus('✅ Pagamento confirmado! Liberando acesso...');
           this.pararVerificacao();
           
-          // Redirecionar após confirmação
+          // Disparar evento customizado de pagamento confirmado
+          window.dispatchEvent(new CustomEvent('paymentConfirmed', {
+            detail: {
+              transactionId: this.estado.transactionId,
+              status: data.status,
+              value: data.value
+            }
+          }));
+          
+          // Evento Facebook Pixel
+          if (typeof fbq !== 'undefined') {
+            fbq('track', 'Purchase', {
+              value: this.estado.valorAtual / 100,
+              currency: 'BRL',
+              content_name: this.config.planoAtual
+            });
+          }
+          
+          // Mostrar mensagem de sucesso
           setTimeout(() => {
-            window.location.href = '/agradecimento';
-          }, 2000);
+            this.atualizarStatus('🎉 Acesso liberado! Aproveite o conteúdo exclusivo!');
+            
+            // Redirecionar ou atualizar página
+            setTimeout(() => {
+              // Você pode redirecionar para uma página de agradecimento
+              // window.location.href = '/agradecimento';
+              
+              // Ou simplesmente recarregar a página (conteúdo estará desbloqueado)
+              window.location.reload();
+            }, 3000);
+          }, 1000);
+        } else if (data.status === 'pending' || data.status === 'waiting') {
+          // Pagamento ainda pendente, continuar verificando
+          console.log('⏳ Aguardando pagamento...');
+        } else if (data.status === 'cancelled' || data.status === 'expired') {
+          // Pagamento cancelado ou expirado
+          console.log('❌ Pagamento cancelado ou expirado');
+          this.atualizarStatus('❌ Pagamento cancelado ou expirado. Gere um novo QR Code.');
+          this.pararVerificacao();
         }
       } catch (error) {
         console.error('Erro ao verificar pagamento:', error);
