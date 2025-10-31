@@ -15,24 +15,7 @@ export default function Home() {
     setPixelId(process.env.NEXT_PUBLIC_FACEBOOK_PIXEL_ID || 'SEU_PIXEL_ID_AQUI');
   }, []);
 
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      // Carregar scripts após montagem
-      const scripts = [
-        '/js/database.js',
-        '/js/lead-tracking.js',
-        '/js/facebook-pixel.js',
-        '/js/pushinpay-real.js'
-      ];
-      
-      scripts.forEach(src => {
-        const script = document.createElement('script');
-        script.src = src;
-        script.async = true;
-        document.body.appendChild(script);
-      });
-    }
-  }, []);
+  // Scripts são carregados via Script component abaixo
 
   const handlePayment = async (valor, plano) => {
     setCurrentValue(valor);
@@ -403,6 +386,11 @@ export default function Home() {
         <img height="1" width="1" style={{display:'none'}}
              src={`https://www.facebook.com/tr?id=${pixelId}&ev=PageView&noscript=1`} />
       </noscript>
+
+      {/* Scripts do projeto */}
+      <Script src="/js/database.js" strategy="afterInteractive" />
+      <Script src="/js/lead-tracking.js" strategy="afterInteractive" />
+      <Script src="/js/pushinpay-real.js" strategy="afterInteractive" />
     </>
   );
 }
