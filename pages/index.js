@@ -117,7 +117,7 @@ export default function Home() {
       `}</style>
 
       {/* Header */}
-      <div>
+      <div style={{ backgroundColor: '#f9f6f2' }}>
         <div className="max-w-3xl mx-auto px-4 py-4">
           <div className="flex justify-center items-center">
             <div className="flex items-center">
