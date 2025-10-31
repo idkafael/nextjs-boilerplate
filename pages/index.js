@@ -333,7 +333,7 @@ export default function Home() {
               <h6 className="text-lg font-bold text-gray-800">Galeria de Mídias</h6>
             </div>
 
-            <MediaGrid onClick={() => handlePayment(19.90, 'Vitalício')} />
+            <MediaGrid />
 
             <div className="text-center">
               <button onClick={() => handlePayment(19.90, 'Vitalício')} className="w-full bg-gradient-to-r from-orange-500 to-pink-500 text-white py-3 px-6 rounded-lg font-semibold hover:from-orange-600 hover:to-pink-600 transition-all">

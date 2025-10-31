@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 
-export default function MediaGrid({ onClick }) {
+export default function MediaGrid() {
   const videoRefs = useRef({});
   const [playingVideos, setPlayingVideos] = useState({});
   
@@ -18,7 +18,7 @@ export default function MediaGrid({ onClick }) {
 
   const handleMouseEnter = (index) => {
     const video = videoRefs.current[`video-${index}`];
-    if (video) {
+    if (video && video.paused) {
       video.play().then(() => {
         setPlayingVideos(prev => ({ ...prev, [index]: true }));
       }).catch(err => {
@@ -30,7 +30,7 @@ export default function MediaGrid({ onClick }) {
 
   const handleMouseLeave = (index) => {
     const video = videoRefs.current[`video-${index}`];
-    if (video) {
+    if (video && !video.paused) {
       video.pause();
       video.currentTime = 0; // Resetar para o início
       setPlayingVideos(prev => ({ ...prev, [index]: false }));
@@ -42,8 +42,7 @@ export default function MediaGrid({ onClick }) {
       {media.map((item, index) => (
         <div 
           key={index} 
-          className="aspect-square relative media-item cursor-pointer" 
-          onClick={onClick}
+          className="aspect-square relative media-item" 
           onMouseEnter={() => handleMouseEnter(index)}
           onMouseLeave={() => handleMouseLeave(index)}
         >
