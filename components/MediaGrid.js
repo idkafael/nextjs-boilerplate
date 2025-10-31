@@ -92,11 +92,11 @@ export default function MediaGrid() {
         >
           {item.type === 'video' ? (
             <>
-              {/* Thumbnail/Preview - sempre visível */}
+              {/* Thumbnail/Preview - sempre visível com blur */}
               <img 
                 src={item.poster || item.src.replace('.mp4', '.jpg')} 
                 alt={`Preview ${index + 1}`}
-                className={`w-full h-full object-cover rounded-lg transition-opacity duration-300 ${
+                className={`w-full h-full object-cover rounded-lg media-blur transition-all duration-300 ${
                   playingVideos[index] ? 'opacity-0 absolute' : 'opacity-100'
                 }`}
                 loading="lazy"
@@ -129,7 +129,7 @@ export default function MediaGrid() {
             <img 
               src={item.src} 
               alt={`Media ${index + 1}`} 
-              className="w-full h-full object-cover rounded-lg transition-all duration-300" 
+              className="w-full h-full object-cover rounded-lg media-blur transition-all duration-300" 
               loading="lazy" // Lazy loading para imagens também
             />
           )}

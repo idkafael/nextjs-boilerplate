@@ -90,11 +90,11 @@ export default function Home() {
           left: 0;
         }
         .media-blur {
-          filter: blur(3px);
+          filter: blur(5px);
           transition: filter 0.3s ease;
         }
         .media-item:hover .media-blur {
-          filter: blur(0px);
+          filter: blur(1px);
         }
         .media-overlay {
           background: linear-gradient(45deg, rgba(0,0,0,0.3), rgba(255,165,0,0.2));
