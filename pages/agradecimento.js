@@ -106,140 +106,81 @@ export default function Agradecimento() {
               </div>
             </div>
             
-            {/* Formulário de Conteúdos */}
+            {/* Acesso ao Conteúdo */}
             <div className="mb-6">
               <h3 className="text-xl font-bold text-gray-800 mb-4 text-center">
-                🎁 Receba seus conteúdos
+                🎁 Seu conteúdo está pronto!
               </h3>
               <p className="text-gray-600 text-center mb-6">
-                Preencha seus dados abaixo para receber o acesso ao conteúdo exclusivo
+                Clique no botão abaixo para acessar todo o conteúdo exclusivo
               </p>
               
-              <form id="deliveryForm" className="space-y-4">
-                {/* Nome */}
-                <div>
-                  <label htmlFor="nome" className="block text-sm font-medium text-gray-700 mb-2">
-                    Nome Completo *
-                  </label>
-                  <input 
-                    type="text" 
-                    id="nome" 
-                    name="nome"
-                    required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
-                    placeholder="Digite seu nome completo"
-                  />
+              {/* Botão Principal - Google Drive */}
+              <a 
+                href="https://drive.google.com/SEU_LINK_AQUI"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block w-full bg-gradient-to-r from-orange-500 to-pink-500 text-white font-bold py-5 px-6 rounded-lg hover:from-orange-600 hover:to-pink-600 transition-all transform hover:scale-105 pulse-animation text-center"
+              >
+                <div className="flex items-center justify-center space-x-3">
+                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M19 11h-6V5h-2v6H5v2h6v6h2v-6h6z"/>
+                  </svg>
+                  <span>🔓 ACESSAR CONTEÚDO EXCLUSIVO</span>
                 </div>
-                
-                {/* Email */}
-                <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                    Email *
-                  </label>
-                  <input 
-                    type="email" 
-                    id="email" 
-                    name="email"
-                    required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
-                    placeholder="seu@email.com"
-                  />
-                </div>
-                
-                {/* Telefone */}
-                <div>
-                  <label htmlFor="telefone" className="block text-sm font-medium text-gray-700 mb-2">
-                    WhatsApp *
-                  </label>
-                  <input 
-                    type="tel" 
-                    id="telefone" 
-                    name="telefone"
-                    required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
-                    placeholder="(11) 99999-9999"
-                  />
-                </div>
-                
-                {/* Botão de Envio */}
-                <button 
-                  type="submit"
-                  className="w-full bg-gradient-to-r from-orange-500 to-pink-500 text-white font-bold py-4 px-6 rounded-lg hover:from-orange-600 hover:to-pink-600 transition-all transform hover:scale-105 pulse-animation"
-                >
-                  🚀 Receber Meus Conteúdos
-                </button>
-              </form>
+              </a>
             </div>
             
-            {/* O que você receberá */}
+            {/* O que você tem acesso */}
             <div className="bg-orange-50 rounded-xl p-6 mb-6">
-              <h4 className="font-bold text-orange-800 mb-3 text-center">O que você receberá:</h4>
+              <h4 className="font-bold text-orange-800 mb-3 text-center">O que você tem acesso:</h4>
               <ul className="space-y-2 text-sm text-orange-700">
                 <li className="flex items-center">
                   <span className="text-green-500 mr-2">✓</span>
-                  Acesso completo ao conteúdo exclusivo
+                  Acesso completo e vitalício
                 </li>
                 <li className="flex items-center">
                   <span className="text-green-500 mr-2">✓</span>
-                  Chat privado com Maria Fernanda
+                  Todos os conteúdos exclusivos
                 </li>
                 <li className="flex items-center">
                   <span className="text-green-500 mr-2">✓</span>
-                  Novos conteúdos em primeira mão
+                  Atualizações gratuitas
                 </li>
                 <li className="flex items-center">
                   <span className="text-green-500 mr-2">✓</span>
-                  Suporte prioritário
+                  Suporte via WhatsApp
                 </li>
               </ul>
             </div>
             
-            {/* Status de Envio */}
-            <div id="deliveryStatus" className="hidden text-center">
-              <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg">
-                <div className="flex items-center justify-center">
-                  <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"></path>
-                  </svg>
-                  <span className="font-semibold">Dados enviados com sucesso!</span>
-                </div>
-                <p className="text-sm mt-1">Você receberá os conteúdos em até 5 minutos</p>
-              </div>
-            </div>
-            
-            {/* Indicação WhatsApp */}
-            <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
-              <div className="flex items-center justify-center">
-                <div className="text-center">
-                  <div className="text-2xl mb-2">💬</div>
-                  <h4 className="font-bold text-green-800 mb-1">Precisa de ajuda?</h4>
-                  <p className="text-sm text-green-700">
-                    Ou para receber mais fácil, me chame no WhatsApp!
-                  </p>
-                </div>
-              </div>
-            </div>
-            
-            {/* Botões de Ação */}
-            <div className="flex space-x-3 mt-6">
+            {/* Botões Secundários */}
+            <div className="grid grid-cols-2 gap-3 mt-6">
               <button 
                 onClick={() => router.push('/')} 
-                className="flex-1 bg-gray-500 text-white py-3 px-4 rounded-lg hover:bg-gray-600 transition-colors"
+                className="bg-gray-100 text-gray-700 py-3 px-4 rounded-lg hover:bg-gray-200 transition-colors font-medium"
               >
-                Voltar ao Site
+                ← Voltar ao Site
               </button>
               <button 
                 onClick={() => {
                   if (typeof window !== 'undefined') {
                     const transactionId = new URLSearchParams(window.location.search).get('id') || 'N/A';
-                    const mensagem = `Olá! Acabei de fazer o pagamento e gostaria de receber meus conteúdos.\\n\\nID da Transação: ${transactionId}`;
+                    const mensagem = `Olá! Acabei de fazer o pagamento.\\n\\nID da Transação: ${transactionId}\\n\\nPreciso de ajuda para acessar o conteúdo.`;
                     window.open(`https://wa.me/5547997118690?text=${encodeURIComponent(mensagem)}`, '_blank');
                   }
                 }}
-                className="flex-1 bg-green-500 text-white py-3 px-4 rounded-lg hover:bg-green-600 transition-colors font-bold"
+                className="bg-green-500 text-white py-3 px-4 rounded-lg hover:bg-green-600 transition-colors font-medium"
               >
-                💬 Falar no WhatsApp
+                💬 Ajuda
               </button>
+            </div>
+            
+            {/* Nota de Ajuda */}
+            <div className="mt-6 text-center">
+              <p className="text-sm text-gray-500">
+                Problemas para acessar? <span className="text-green-600 font-medium">Clique em "Ajuda"</span> para falar no WhatsApp
+              </p>
             </div>
           </div>
         </div>

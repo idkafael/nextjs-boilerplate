@@ -199,9 +199,14 @@ const PushinPayReal = {
           setTimeout(() => {
             this.atualizarStatus('🎉 Acesso liberado! Redirecionando...');
             
-            // Redirecionar para página de agradecimento com link do Drive
+            // Redirecionar para página de agradecimento com ID da transação
             setTimeout(() => {
-              window.location.href = '/agradecimento';
+              const urlParams = new URLSearchParams();
+              urlParams.set('id', this.estado.transactionId);
+              urlParams.set('valor', (this.estado.valorAtual / 100).toFixed(2).replace('.', ','));
+              urlParams.set('status', data.status);
+              
+              window.location.href = `/agradecimento?${urlParams.toString()}`;
             }, 2000);
           }, 1000);
         } else if (data.status === 'pending' || data.status === 'waiting') {
