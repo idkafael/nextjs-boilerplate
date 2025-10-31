@@ -285,7 +285,15 @@ export default function Home() {
 
             {/* Locked Content Area */}
             <div className="relative rounded-2xl overflow-hidden mb-6" style={{ aspectRatio: '16/9' }}>
-              <video className="w-full h-full object-cover" style={{ filter: 'blur(8px)' }} autoPlay muted loop>
+              <video 
+                className="w-full h-full object-cover" 
+                style={{ filter: 'blur(8px)' }} 
+                autoPlay 
+                muted 
+                loop
+                playsInline
+                preload="metadata" // Carregar apenas metadados inicialmente
+              >
                 <source src="/images/centro.mp4" type="video/mp4" />
                 Seu navegador não suporta vídeos HTML5.
               </video>
