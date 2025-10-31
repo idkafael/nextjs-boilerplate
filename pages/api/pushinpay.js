@@ -35,37 +35,72 @@ export default async function handler(req, res) {
       console.log('Criando PIX:', { valor: valorFinal, plano });
       
       // Criar PIX via PushinPay API
-      const response = await fetch('https://api.pushinpay.com.br/pix/cashIn', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          value: valorFinal,
-          webhook_url: null,
-          split_rules: []
-        }),
-      });
-
-      const data = await response.json();
+      // Tentando diferentes endpoints possíveis
+      const apiBaseUrl = process.env.PUSHINPAY_API_URL || 'https://api.pushinpay.com.br';
+      const endpoints = [
+        '/api/v1/pix',
+        '/v1/pix',
+        '/api/pix',
+        '/pix',
+        '/transactions/pix'
+      ];
       
-      if (!response.ok) {
-        console.error('Erro PushinPay API:', {
-          status: response.status,
-          statusText: response.statusText,
-          data: data
-        });
-        return res.status(response.status).json({ 
-          error: data.error || data.message || 'Erro ao criar PIX',
-          message: data.error || data.message || 'Erro ao criar PIX',
-          details: data
-        });
+      let response = null;
+      let lastError = null;
+      
+      // Tentar cada endpoint até encontrar um que funcione
+      for (const endpoint of endpoints) {
+        try {
+          const url = `${apiBaseUrl}${endpoint}`;
+          console.log(`Tentando endpoint: ${url}`);
+          
+          response = await fetch(url, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Accept': 'application/json',
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              value: valorFinal,
+              amount: valorFinal, // Algumas APIs usam 'amount' em vez de 'value'
+              webhook_url: null,
+              webhookUrl: null,
+              split_rules: [],
+              splitRules: []
+            }),
+          });
+          
+          const data = await response.json();
+          
+          if (response.ok) {
+            console.log(`✅ Endpoint funcionou: ${url}`);
+            console.log('PIX criado com sucesso:', data);
+            return res.status(200).json(data);
+          } else if (response.status !== 404) {
+            // Se não for 404, esse pode ser o endpoint correto mas com erro diferente
+            console.error(`Endpoint ${url} retornou ${response.status}:`, data);
+            return res.status(response.status).json({ 
+              error: data.error || data.message || 'Erro ao criar PIX',
+              message: data.error || data.message || 'Erro ao criar PIX',
+              details: data
+            });
+          }
+          
+          lastError = data;
+        } catch (error) {
+          console.error(`Erro ao tentar endpoint ${endpoint}:`, error.message);
+          lastError = { message: error.message };
+        }
       }
-
-      console.log('PIX criado com sucesso:', data);
-      return res.status(200).json(data);
+      
+      // Se nenhum endpoint funcionou, retornar erro
+      console.error('Nenhum endpoint da API PushinPay funcionou');
+      return res.status(404).json({ 
+        error: 'Endpoint da API PushinPay não encontrado. Verifique a documentação da API.',
+        message: 'Endpoint da API PushinPay não encontrado. Verifique a documentação da API.',
+        details: lastError
+      });
     }
 
     if (action === 'check-payment') {
