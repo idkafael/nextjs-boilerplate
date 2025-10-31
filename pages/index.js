@@ -50,9 +50,9 @@ export default function Home() {
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link rel="icon" type="image/png" href="/images/favicon.png" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet" />
-        <link rel="stylesheet" href="/css/style.css" />
-        <script src="https://cdn.tailwindcss.com"></script>
       </Head>
+      
+      <Script src="https://cdn.tailwindcss.com" strategy="beforeInteractive" />
 
       <style jsx global>{`
         body {
