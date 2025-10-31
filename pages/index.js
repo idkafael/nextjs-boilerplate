@@ -7,7 +7,6 @@ import ModalPagamento from '../components/ModalPagamento';
 export default function Home() {
   const [pixelId, setPixelId] = useState('');
   const [modalAberto, setModalAberto] = useState(false);
-  const [showFullDescription, setShowFullDescription] = useState(false);
   const [activeTab, setActiveTab] = useState('posts');
   const [currentValue, setCurrentValue] = useState(19.90);
   const [currentPlan, setCurrentPlan] = useState('Vitalício');
@@ -89,9 +88,6 @@ export default function Home() {
         }
         .payment-overlay.active {
           left: 0;
-        }
-        .blurred {
-          filter: blur(4px);
         }
         .media-blur {
           filter: blur(3px);
@@ -183,12 +179,9 @@ export default function Home() {
           <p className="text-sm text-gray-600 mb-2 -mt-1">@marcellymar</p> 
           
           {/* Description */}
-          <p className={`text-gray-800 text-sm -mt-2 ${!showFullDescription ? 'blurred' : ''}`}>
+          <p className="text-gray-800 text-sm -mt-2">
             🔥Conteúdo totalmente EXPLÍCITO mostrando tudo 🔞 Vídeos solo e CENAS DE SEXO EM CASAL, com homens DOTADOS de todos os estilos 👌🏼😱 Cenas em lugares proibidos e também com alguns familires...
           </p>
-          <button onClick={() => setShowFullDescription(!showFullDescription)} className="mb-2 text-orange-500 hover:text-orange-600">
-            {showFullDescription ? 'Ver menos' : 'Ler mais'}
-          </button>
           
           {/* Social Media Links */}
           <div className="flex space-x-2 mt-2">
