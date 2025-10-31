@@ -45,6 +45,11 @@ export default function MediaGrid() {
           className="aspect-square relative media-item" 
           onMouseEnter={() => handleMouseEnter(index)}
           onMouseLeave={() => handleMouseLeave(index)}
+          onClick={(e) => {
+            // Prevenir qualquer ação ao clicar nas mídias
+            e.preventDefault();
+            e.stopPropagation();
+          }}
         >
           {item.type === 'video' ? (
             <video 
