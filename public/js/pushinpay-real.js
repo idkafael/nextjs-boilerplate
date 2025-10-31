@@ -197,16 +197,12 @@ const PushinPayReal = {
           
           // Mostrar mensagem de sucesso
           setTimeout(() => {
-            this.atualizarStatus('🎉 Acesso liberado! Aproveite o conteúdo exclusivo!');
+            this.atualizarStatus('🎉 Acesso liberado! Redirecionando...');
             
-            // Redirecionar ou atualizar página
+            // Redirecionar para página de agradecimento com link do Drive
             setTimeout(() => {
-              // Você pode redirecionar para uma página de agradecimento
-              // window.location.href = '/agradecimento';
-              
-              // Ou simplesmente recarregar a página (conteúdo estará desbloqueado)
-              window.location.reload();
-            }, 3000);
+              window.location.href = '/agradecimento';
+            }, 2000);
           }, 1000);
         } else if (data.status === 'pending' || data.status === 'waiting') {
           // Pagamento ainda pendente, continuar verificando
