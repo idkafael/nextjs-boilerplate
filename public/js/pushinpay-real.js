@@ -10,7 +10,8 @@ const PushinPayReal = {
   estado: {
     qrCodeAtivo: false,
     intervaloVerificacao: null,
-    valorAtual: 1990
+    valorAtual: 1990,
+    transactionId: null
   },
   
   atualizarValorPlano(valor, plano) {
@@ -22,7 +23,12 @@ const PushinPayReal = {
   
   async criarPix() {
     try {
-      console.log('🔍 Criando PIX via API Route...');
+      this.atualizarStatus('Gerando pagamento...');
+      console.log('🔍 Criando PIX via API Route...', {
+        valor: this.estado.valorAtual,
+        plano: this.config.planoAtual
+      });
+      
       const response = await fetch(`${this.config.baseUrl}/pushinpay`, {
         method: 'POST',
         headers: {
@@ -36,16 +42,42 @@ const PushinPayReal = {
         })
       });
       
+      const data = await response.json();
+      
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(`PushinPay API Error: ${errorData.message || 'Unknown error'}`);
+        const errorMsg = data.error || data.message || 'Erro desconhecido ao criar PIX';
+        console.error('❌ Erro na API:', {
+          status: response.status,
+          error: errorMsg,
+          details: data
+        });
+        
+        this.atualizarStatus(`Erro: ${errorMsg}`);
+        throw new Error(`PushinPay API Error: ${errorMsg}`);
       }
       
-      const data = await response.json();
       console.log('✅ PIX criado com sucesso:', data);
+      
+      // Exibir QR Code e código PIX
+      if (data.qr_code_base64) {
+        this.exibirQRCode(data.qr_code_base64);
+      }
+      
+      if (data.pix_code) {
+        this.exibirCodigoPix(data.pix_code);
+      }
+      
+      if (data.transaction_id) {
+        this.estado.transactionId = data.transaction_id;
+        this.iniciarVerificacao();
+      }
+      
+      this.atualizarStatus('QR Code gerado com sucesso!');
+      
       return data;
     } catch (error) {
       console.error('❌ Erro ao criar PIX:', error);
+      this.atualizarStatus(`Erro: ${error.message || 'Falha ao gerar pagamento'}`);
       throw error;
     }
   },
@@ -66,23 +98,70 @@ const PushinPayReal = {
     }
   },
   
-  atualizarStatus(mensagem) {
+  atualizarStatus(mensagem, isError = false) {
     const statusDiv = document.getElementById('paymentStatus');
     if (statusDiv) {
+      const colorClass = isError ? 'text-red-600' : 'text-orange-600';
+      const icon = isError ? '' : `
+        <svg class="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+        </svg>
+      `;
+      
       statusDiv.innerHTML = `
-        <div class="flex items-center justify-center space-x-2 text-orange-600">
-          <svg class="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-          </svg>
+        <div class="flex items-center justify-center space-x-2 ${colorClass}">
+          ${icon}
           <span>${mensagem}</span>
         </div>
       `;
     }
   },
   
-  iniciarVerificacao() {
-    console.log('🔄 Iniciando verificação de pagamento...');
-    // TODO: Implementar verificação de pagamento
+  async iniciarVerificacao() {
+    if (!this.estado.transactionId) {
+      console.warn('⚠️ Transaction ID não disponível para verificação');
+      return;
+    }
+    
+    console.log('🔄 Iniciando verificação de pagamento...', this.estado.transactionId);
+    
+    this.pararVerificacao(); // Garantir que não há múltiplas verificações
+    
+    this.estado.intervaloVerificacao = setInterval(async () => {
+      try {
+        const response = await fetch(`${this.config.baseUrl}/pushinpay`, {
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            action: 'check-payment',
+            transactionId: this.estado.transactionId
+          })
+        });
+        
+        if (!response.ok) {
+          console.error('Erro ao verificar pagamento:', response.status);
+          return;
+        }
+        
+        const data = await response.json();
+        
+        if (data.status === 'paid' || data.status === 'approved') {
+          console.log('✅ Pagamento confirmado!');
+          this.atualizarStatus('Pagamento confirmado! Redirecionando...');
+          this.pararVerificacao();
+          
+          // Redirecionar após confirmação
+          setTimeout(() => {
+            window.location.href = '/agradecimento';
+          }, 2000);
+        }
+      } catch (error) {
+        console.error('Erro ao verificar pagamento:', error);
+      }
+    }, 3000); // Verificar a cada 3 segundos
   },
   
   pararVerificacao() {

@@ -22,6 +22,18 @@ export default async function handler(req, res) {
     if (action === 'create-pix') {
       const { valor, plano } = req.body;
       
+      // Validar valor
+      const valorFinal = valor || parseInt(process.env.PLANO_VITALICIO_19_90) || 1990;
+      
+      if (!valorFinal || valorFinal < 100) {
+        return res.status(400).json({ 
+          error: 'Valor inválido. O valor mínimo é R$ 1,00',
+          message: 'Valor inválido. O valor mínimo é R$ 1,00'
+        });
+      }
+      
+      console.log('Criando PIX:', { valor: valorFinal, plano });
+      
       // Criar PIX via PushinPay API
       const response = await fetch('https://api.pushinpay.com.br/pix/cashIn', {
         method: 'POST',
@@ -31,7 +43,7 @@ export default async function handler(req, res) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          value: valor || process.env.PLANO_VITALICIO_19_90 || 1990,
+          value: valorFinal,
           webhook_url: null,
           split_rules: []
         }),
@@ -40,9 +52,19 @@ export default async function handler(req, res) {
       const data = await response.json();
       
       if (!response.ok) {
-        return res.status(response.status).json({ error: data.message || 'Erro ao criar PIX' });
+        console.error('Erro PushinPay API:', {
+          status: response.status,
+          statusText: response.statusText,
+          data: data
+        });
+        return res.status(response.status).json({ 
+          error: data.error || data.message || 'Erro ao criar PIX',
+          message: data.error || data.message || 'Erro ao criar PIX',
+          details: data
+        });
       }
 
+      console.log('PIX criado com sucesso:', data);
       return res.status(200).json(data);
     }
 
@@ -71,10 +93,17 @@ export default async function handler(req, res) {
       return res.status(200).json(data);
     }
 
-    return res.status(400).json({ error: 'Ação inválida' });
+    return res.status(400).json({ 
+      error: 'Ação inválida',
+      message: 'Ação inválida' 
+    });
   } catch (error) {
     console.error('Erro na API PushinPay:', error);
-    return res.status(500).json({ error: 'Erro interno do servidor' });
+    return res.status(500).json({ 
+      error: error.message || 'Erro interno do servidor',
+      message: error.message || 'Erro interno do servidor',
+      type: error.name || 'Error'
+    });
   }
 }
 

@@ -40,10 +40,17 @@ export default function Home() {
     setCurrentPlan(plano);
     setModalAberto(true);
     
-    // TODO: Integrar com PushinPay
+    // Integrar com PushinPay
     if (typeof window !== 'undefined' && window.PushinPayReal) {
-      window.PushinPayReal.atualizarValorPlano(valor, plano);
-      await window.PushinPayReal.criarPix();
+      try {
+        window.PushinPayReal.atualizarValorPlano(valor, plano);
+        await window.PushinPayReal.criarPix();
+      } catch (error) {
+        console.error('Erro ao processar pagamento:', error);
+        // O erro já é exibido no modal pela função atualizarStatus
+      }
+    } else {
+      console.error('PushinPayReal não está disponível');
     }
   };
 
