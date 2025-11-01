@@ -72,9 +72,15 @@ const PushinPayReal = {
         this.exibirCodigoPix(data.qr_code);
       }
       
-      if (data.id) {
-        this.estado.transactionId = data.id;
+      // Salvar transactionId de várias formas possíveis (dependendo da API)
+      const transactionId = data.id || data.transaction_id || data.transactionId || data.payment_id;
+      if (transactionId) {
+        this.estado.transactionId = transactionId;
+        console.log('✅ Transaction ID salvo:', transactionId);
+        // Iniciar verificação automática após criar PIX
         this.iniciarVerificacao();
+      } else {
+        console.warn('⚠️ Transaction ID não encontrado na resposta da API:', data);
       }
       
       this.atualizarStatus('QR Code gerado com sucesso!');
