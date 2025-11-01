@@ -168,12 +168,18 @@ const PushinPayReal = {
         }
         
         const data = await response.json();
-        console.log('📊 Status do pagamento:', data.status);
+        const status = data.status?.toLowerCase() || data.payment_status?.toLowerCase() || 'unknown';
+        console.log('📊 Status do pagamento:', status, '| Dados completos:', data);
         
         // Verificar se o pagamento foi confirmado
-        // Status possíveis: paid, approved, confirmed
-        if (data.status === 'paid' || data.status === 'approved' || data.status === 'confirmed') {
-          console.log('✅ Pagamento confirmado!');
+        // Status possíveis: paid, approved, confirmed, completed, success
+        const statusConfirmado = ['paid', 'approved', 'confirmed', 'completed', 'success'];
+        const isPagamentoConfirmado = statusConfirmado.includes(status) || 
+                                       data.paid === true || 
+                                       data.confirmed === true;
+        
+        if (isPagamentoConfirmado) {
+          console.log('✅✅✅ PAGAMENTO CONFIRMADO! Redirecionando para agradecimento...');
           this.atualizarStatus('✅ Pagamento confirmado! Liberando acesso...');
           this.pararVerificacao();
           
@@ -181,47 +187,59 @@ const PushinPayReal = {
           window.dispatchEvent(new CustomEvent('paymentConfirmed', {
             detail: {
               transactionId: this.estado.transactionId,
-              status: data.status,
-              value: data.value
+              status: status,
+              value: data.value || this.estado.valorAtual
             }
           }));
           
           // Evento Facebook Pixel
           if (typeof fbq !== 'undefined') {
-            fbq('track', 'Purchase', {
-              value: this.estado.valorAtual / 100,
-              currency: 'BRL',
-              content_name: this.config.planoAtual
-            });
+            try {
+              fbq('track', 'Purchase', {
+                value: this.estado.valorAtual / 100,
+                currency: 'BRL',
+                content_name: this.config.planoAtual
+              });
+              console.log('✅ Facebook Pixel Purchase event enviado');
+            } catch (fbError) {
+              console.warn('⚠️ Erro ao enviar Facebook Pixel:', fbError);
+            }
           }
           
-          // Mostrar mensagem de sucesso
+          // Redirecionar IMEDIATAMENTE após confirmar pagamento
+          const valorFormatado = (this.estado.valorAtual / 100).toFixed(2).replace('.', ',');
+          const urlParams = new URLSearchParams();
+          urlParams.set('id', this.estado.transactionId);
+          urlParams.set('valor', valorFormatado);
+          urlParams.set('status', status);
+          
+          // Mostrar mensagem de sucesso e redirecionar
+          this.atualizarStatus('🎉 Acesso liberado! Redirecionando...');
+          
+          // Redirecionar após 1 segundo (tempo suficiente para mostrar mensagem)
           setTimeout(() => {
-            this.atualizarStatus('🎉 Acesso liberado! Redirecionando...');
-            
-            // Redirecionar para página de agradecimento com ID da transação
-            setTimeout(() => {
-              const urlParams = new URLSearchParams();
-              urlParams.set('id', this.estado.transactionId);
-              urlParams.set('valor', (this.estado.valorAtual / 100).toFixed(2).replace('.', ','));
-              urlParams.set('status', data.status);
-              
-              window.location.href = `/agradecimento?${urlParams.toString()}`;
-            }, 2000);
+            console.log('🔄 Redirecionando para:', `/agradecimento?${urlParams.toString()}`);
+            window.location.href = `/agradecimento?${urlParams.toString()}`;
           }, 1000);
-        } else if (data.status === 'pending' || data.status === 'waiting') {
+          
+        } else if (status === 'pending' || status === 'waiting' || status === 'processing') {
           // Pagamento ainda pendente, continuar verificando
-          console.log('⏳ Aguardando pagamento...');
-        } else if (data.status === 'cancelled' || data.status === 'expired') {
+          console.log('⏳ Aguardando pagamento... Status:', status);
+        } else if (status === 'cancelled' || status === 'canceled' || status === 'expired' || status === 'failed') {
           // Pagamento cancelado ou expirado
-          console.log('❌ Pagamento cancelado ou expirado');
+          console.log('❌ Pagamento cancelado ou expirado. Status:', status);
           this.atualizarStatus('❌ Pagamento cancelado ou expirado. Gere um novo QR Code.');
           this.pararVerificacao();
+        } else {
+          // Status desconhecido, continuar verificando por segurança
+          console.log('⚠️ Status desconhecido:', status, '- Continuando verificação...');
         }
       } catch (error) {
         console.error('Erro ao verificar pagamento:', error);
       }
-    }, 3000); // Verificar a cada 3 segundos
+    }, 3000); // Verificar a cada 3 segundos (otimizado para resposta rápida)
+    
+    console.log('✅ Verificação automática iniciada - Checando a cada 3 segundos');
   },
   
   pararVerificacao() {
