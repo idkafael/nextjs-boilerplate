@@ -24,7 +24,8 @@ export default async function handler(req, res) {
       
       // Validar valor
       // PushinPay: valor mínimo é 50 centavos (segundo documentação)
-      const valorFinal = valor || parseInt(process.env.PLANO_VITALICIO_19_90) || 1990;
+      // O valor vem do frontend em centavos (990, 1990, 4990)
+      const valorFinal = valor || parseInt(process.env.PLANO_VITALICIO_19_90) || 990;
       
       if (!valorFinal || valorFinal < 50) {
         return res.status(400).json({ 
