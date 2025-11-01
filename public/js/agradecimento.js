@@ -18,7 +18,7 @@
     try {
       if (typeof fbq !== 'undefined' && fbq) {
         fbq('track', 'Purchase', {
-          value: 19.90,
+          value: 9.90,
           currency: 'BRL',
           content_name: 'Curso Privacy',
           content_category: 'Digital Product',
@@ -44,7 +44,7 @@
         if (transacaoTemp.transactionId) {
           const dados = {
             transactionId: transacaoTemp.transactionId,
-            valor: transacaoTemp.valor || 19.90,
+            valor: transacaoTemp.valor || 9.90,
             plano: transacaoTemp.plano || '1 mês',
             status: 'paid',
             tags: ['convertido', 'pago', 'agradecimento_visualizado'],

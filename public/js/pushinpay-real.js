@@ -2,7 +2,7 @@
 const PushinPayReal = {
   config: {
     baseUrl: '/api', // Aponta para a API Route do Next.js
-    valor: 1990, // R$ 19,90 em centavos (vitalício)
+    valor: 990, // R$ 9,90 em centavos (vitalício)
     webhookUrl: null,
     planoAtual: 'Vitalício'
   },
@@ -10,7 +10,7 @@ const PushinPayReal = {
   estado: {
     qrCodeAtivo: false,
     intervaloVerificacao: null,
-    valorAtual: 1990,
+    valorAtual: 990,
     transactionId: null
   },
   

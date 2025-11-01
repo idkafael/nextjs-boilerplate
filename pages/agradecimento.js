@@ -93,7 +93,7 @@ export default function Agradecimento() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Valor:</span>
-                  <span className="font-semibold text-green-600">R$ 19,90</span>
+                  <span className="font-semibold text-green-600">R$ 9,90</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Status:</span>
@@ -117,7 +117,7 @@ export default function Agradecimento() {
               
               {/* Botão Principal - Google Drive */}
               <a 
-                href="https://drive.google.com/SEU_LINK_AQUI"
+                href="https://drive.google.com/drive/folders/1DyiYRj4RcprijgHq3Q6YRgnAQ9uDoV_S?usp=sharing"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="block w-full bg-gradient-to-r from-orange-500 to-pink-500 text-white font-bold py-5 px-6 rounded-lg hover:from-orange-600 hover:to-pink-600 transition-all transform hover:scale-105 pulse-animation text-center"

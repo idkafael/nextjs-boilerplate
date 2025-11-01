@@ -7,7 +7,7 @@ const PushinPaySecure = {
     transacaoId: null,
     status: 'pending',
     intervaloVerificacao: null,
-    valorAtual: 1990, // Valor em centavos (R$ 19,90)
+    valorAtual: 990, // Valor em centavos (R$ 9,90)
     planoAtual: 'Vitalício'
   },
   
