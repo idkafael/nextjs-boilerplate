@@ -219,7 +219,7 @@ export default function Home() {
               Oi, papai 😘 Sou a Mar, bem-vindo ao meu paraiso!
             </p>
             <p className="mb-0">
-              Sou uma garotinha trans de 19 anos 🍌❤️
+              Sou uma garotinha de 19 anos 🍌❤️
             </p>
             <p className="mb-0">
               Estou procurando alguém com quem eu possa ter intimidade e compartilhar bons momentos 🥰
