@@ -12,8 +12,12 @@ export default function Home() {
   const [currentValue, setCurrentValue] = useState(9.90);
   const [currentPlan, setCurrentPlan] = useState('1 Mês');
   const [imageVersion, setImageVersion] = useState('');
+  const [mounted, setMounted] = useState(false);
   
   useEffect(() => {
+    // Marcar como montado no cliente
+    setMounted(true);
+    
     // Verificar se estamos no cliente antes de acessar process.env
     if (typeof window !== 'undefined') {
       const pixelIdValue = process.env.NEXT_PUBLIC_FACEBOOK_PIXEL_ID || 'SEU_PIXEL_ID_AQUI';
@@ -145,8 +149,9 @@ export default function Home() {
         {/* Banner Image - com cache busting para garantir atualização */}
         <img 
           className="w-full h-64 object-cover" 
-          src={imageVersion ? `/images/banner.jpg?v=${imageVersion}` : '/images/banner.jpg'} 
+          src={mounted && imageVersion ? `/images/banner.jpg?v=${imageVersion}` : '/images/banner.jpg'} 
           alt="Banner"
+          loading="eager"
           onError={(e) => {
             // Se banner.jpg não existir, tenta sem cache busting
             if (e.target.src.includes('?v=')) {
@@ -187,8 +192,9 @@ export default function Home() {
           <div className="flex justify-start -mt-16 mb-4">
             <img 
               className="h-24 w-24 rounded-full border-4 border-white object-cover" 
-              src={imageVersion ? `/images/perfil.jpg?v=${imageVersion}` : '/images/perfil.jpg'} 
+              src={mounted && imageVersion ? `/images/perfil.jpg?v=${imageVersion}` : '/images/perfil.jpg'} 
               alt="Perfil"
+              loading="eager"
               onError={(e) => {
                 // Se perfil.jpg não existir, tenta sem cache busting
                 if (e.target.src.includes('?v=')) {
@@ -345,28 +351,37 @@ export default function Home() {
             <div className="relative rounded-2xl overflow-hidden mb-6" style={{ aspectRatio: '16/9' }}>
               <video 
                 ref={(video) => {
-                  if (video) {
-                    video.play().catch(err => {
-                      console.log('Autoplay bloqueado, tentando novamente...', err);
-                      // Tentar novamente após interação do usuário
-                      const tryPlay = () => {
-                        video.play().catch(() => {});
-                        document.removeEventListener('click', tryPlay);
-                        document.removeEventListener('touchstart', tryPlay);
-                      };
-                      document.addEventListener('click', tryPlay);
-                      document.addEventListener('touchstart', tryPlay);
-                    });
+                  if (video && mounted) {
+                    // Aguardar um pouco antes de tentar reproduzir para evitar problemas de inicialização
+                    setTimeout(() => {
+                      const playPromise = video.play();
+                      if (playPromise !== undefined) {
+                        playPromise.catch(err => {
+                          // Autoplay bloqueado é normal, não precisa logar
+                          if (err.name !== 'NotAllowedError') {
+                            console.log('Erro ao reproduzir vídeo:', err);
+                          }
+                          // Tentar novamente após interação do usuário
+                          const tryPlay = () => {
+                            video.play().catch(() => {});
+                            document.removeEventListener('click', tryPlay);
+                            document.removeEventListener('touchstart', tryPlay);
+                          };
+                          document.addEventListener('click', tryPlay, { once: true });
+                          document.addEventListener('touchstart', tryPlay, { once: true });
+                        });
+                      }
+                    }, 300);
                   }
                 }}
                 className="w-full h-full object-cover" 
                 style={{ filter: 'blur(8px)' }} 
                 src="https://i.imgur.com/I0eKs4Q.mp4"
-                autoPlay
                 muted
                 loop
                 playsInline
                 controls={false}
+                preload="metadata"
               />
               
               <div className="absolute inset-0 bg-black bg-opacity-50 pointer-events-none"></div>
