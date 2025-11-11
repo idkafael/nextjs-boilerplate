@@ -1,25 +1,6 @@
 // API Route para estatísticas de vendas
 
-import fs from 'fs';
-import path from 'path';
-
-const VENDAS_FILE = path.join(process.cwd(), 'data', 'vendas.json');
-
-function lerVendas() {
-  const dataDir = path.join(process.cwd(), 'data');
-  if (!fs.existsSync(dataDir)) {
-    return [];
-  }
-  if (!fs.existsSync(VENDAS_FILE)) {
-    return [];
-  }
-  try {
-    const data = fs.readFileSync(VENDAS_FILE, 'utf8');
-    return JSON.parse(data);
-  } catch (error) {
-    return [];
-  }
-}
+import { lerVendas } from '../../lib/vendasStorage';
 
 export default async function handler(req, res) {
   // Verificar autenticação básica
@@ -117,7 +98,9 @@ export default async function handler(req, res) {
     });
   } catch (error) {
     console.error('Erro ao calcular estatísticas:', error);
-    return res.status(500).json({ error: 'Erro ao calcular estatísticas' });
+    return res.status(500).json({ 
+      error: 'Erro ao calcular estatísticas',
+      message: error.message 
+    });
   }
 }
-

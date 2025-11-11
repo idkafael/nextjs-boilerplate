@@ -75,3 +75,5 @@ backup/
 data/
 vendas.json
 
+
+.vercel

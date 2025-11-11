@@ -1,51 +1,16 @@
 // API Route para gerenciar vendas
 // GET - Listar vendas
 // POST - Adicionar venda
+// 
+// NOTA: Na Vercel (serverless), usamos armazenamento em memória
+// Para produção, considere migrar para um banco de dados (MongoDB, PostgreSQL, etc.)
 
-import fs from 'fs';
-import path from 'path';
-
-const VENDAS_FILE = path.join(process.cwd(), 'data', 'vendas.json');
-
-// Garantir que o diretório existe
-function ensureDataDir() {
-  const dataDir = path.join(process.cwd(), 'data');
-  if (!fs.existsSync(dataDir)) {
-    fs.mkdirSync(dataDir, { recursive: true });
-  }
-}
-
-// Ler vendas do arquivo
-function lerVendas() {
-  ensureDataDir();
-  if (!fs.existsSync(VENDAS_FILE)) {
-    return [];
-  }
-  try {
-    const data = fs.readFileSync(VENDAS_FILE, 'utf8');
-    return JSON.parse(data);
-  } catch (error) {
-    console.error('Erro ao ler vendas:', error);
-    return [];
-  }
-}
-
-// Salvar vendas no arquivo
-function salvarVendas(vendas) {
-  ensureDataDir();
-  try {
-    fs.writeFileSync(VENDAS_FILE, JSON.stringify(vendas, null, 2), 'utf8');
-    return true;
-  } catch (error) {
-    console.error('Erro ao salvar vendas:', error);
-    return false;
-  }
-}
+import { lerVendas, salvarVendas } from '../../lib/vendasStorage';
 
 export default async function handler(req, res) {
   // Verificar autenticação básica
   const authHeader = req.headers.authorization;
-  const expectedToken = process.env.DASHBOARD_TOKEN || 'admin123'; // Mude isso!
+  const expectedToken = process.env.DASHBOARD_TOKEN || 'admin123';
   
   if (!authHeader || authHeader !== `Bearer ${expectedToken}`) {
     return res.status(401).json({ error: 'Não autorizado' });
@@ -92,7 +57,10 @@ export default async function handler(req, res) {
       });
     } catch (error) {
       console.error('Erro ao buscar vendas:', error);
-      return res.status(500).json({ error: 'Erro ao buscar vendas' });
+      return res.status(500).json({ 
+        error: 'Erro ao buscar vendas',
+        message: error.message 
+      });
     }
   }
 
@@ -134,10 +102,12 @@ export default async function handler(req, res) {
       });
     } catch (error) {
       console.error('Erro ao salvar venda:', error);
-      return res.status(500).json({ error: 'Erro ao salvar venda' });
+      return res.status(500).json({ 
+        error: 'Erro ao salvar venda',
+        message: error.message 
+      });
     }
   }
 
   return res.status(405).json({ error: 'Método não permitido' });
 }
-
