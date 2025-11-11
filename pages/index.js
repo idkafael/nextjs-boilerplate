@@ -469,39 +469,37 @@ export default function Home() {
         plano={currentPlan}
       />
       
-      {/* Facebook Pixel - Script externo para evitar erro appendChild */}
-      {pixelId && pixelId !== 'SEU_PIXEL_ID_AQUI' && (
-        <>
-          <Script 
-            src="https://connect.facebook.net/en_US/fbevents.js"
-            strategy="afterInteractive"
-            onError={(e) => {
-              console.info('ℹ️ Facebook Pixel bloqueado por AdBlock');
-            }}
-          />
-          <Script 
-            id="fb-pixel-init" 
-            strategy="afterInteractive"
-            dangerouslySetInnerHTML={{
-              __html: `(function() {
-                if (typeof fbq === 'undefined') {
-                  window.fbq = function() {};
-                  window.fbq.queue = [];
-                }
-                try {
-                  var pixelId = '${pixelId.replace(/'/g, "\\'")}';
-                  if (pixelId && pixelId !== 'SEU_PIXEL_ID_AQUI') {
-                    fbq('init', pixelId);
-                    fbq('track', 'PageView');
-                  }
-                } catch(e) {
-                  console.info('FB Pixel bloqueado ou erro:', e);
-                }
-              })();`
-            }}
-          />
-        </>
-      )}
+      {/* Meta Pixel Code - Código oficial do Facebook */}
+      <Script 
+        id="meta-pixel-code"
+        strategy="afterInteractive"
+        dangerouslySetInnerHTML={{
+          __html: `
+            !function(f,b,e,v,n,t,s)
+            {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+            n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+            if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+            n.queue=[];t=b.createElement(e);t.async=!0;
+            t.src=v;s=b.getElementsByTagName(e)[0];
+            s.parentNode.insertBefore(t,s)}(window, document,'script',
+            'https://connect.facebook.net/en_US/fbevents.js');
+            fbq('init', '856032176652340');
+            fbq('track', 'PageView');
+          `
+        }}
+        onError={(e) => {
+          console.info('ℹ️ Meta Pixel bloqueado por AdBlock');
+        }}
+      />
+      <noscript>
+        <img 
+          height="1" 
+          width="1" 
+          style={{display: 'none'}}
+          src="https://www.facebook.com/tr?id=856032176652340&ev=PageView&noscript=1"
+          alt=""
+        />
+      </noscript>
 
       {/* Scripts do projeto - Carregamento adiado para evitar bloqueios */}
       <Script 
