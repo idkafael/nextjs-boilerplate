@@ -18,17 +18,19 @@ export default function Dashboard() {
   const DASHBOARD_TOKEN = 'admin123'; // Mude esta senha!
 
   useEffect(() => {
-    // Verificar se já está autenticado
-    const token = localStorage.getItem('dashboard_token');
-    if (token === DASHBOARD_TOKEN) {
-      setAutenticado(true);
-      carregarDados();
+    // Verificar se já está autenticado (apenas no cliente)
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('dashboard_token');
+      if (token === DASHBOARD_TOKEN) {
+        setAutenticado(true);
+        carregarDados();
+      }
     }
   }, []);
 
   const fazerLogin = (e) => {
     e.preventDefault();
-    if (senha === DASHBOARD_TOKEN) {
+    if (typeof window !== 'undefined' && senha === DASHBOARD_TOKEN) {
       localStorage.setItem('dashboard_token', senha);
       setAutenticado(true);
       carregarDados();
@@ -38,12 +40,16 @@ export default function Dashboard() {
   };
 
   const fazerLogout = () => {
-    localStorage.removeItem('dashboard_token');
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('dashboard_token');
+    }
     setAutenticado(false);
     router.push('/');
   };
 
   const carregarDados = async () => {
+    if (typeof window === 'undefined') return;
+    
     setCarregando(true);
     try {
       const token = localStorage.getItem('dashboard_token');
@@ -54,6 +60,11 @@ export default function Dashboard() {
           'Authorization': `Bearer ${token}`
         }
       });
+      
+      if (!statsRes.ok) {
+        throw new Error(`Erro ${statsRes.status}: ${statsRes.statusText}`);
+      }
+      
       const statsData = await statsRes.json();
       setStats(statsData);
 
@@ -63,11 +74,16 @@ export default function Dashboard() {
           'Authorization': `Bearer ${token}`
         }
       });
+      
+      if (!vendasRes.ok) {
+        throw new Error(`Erro ${vendasRes.status}: ${vendasRes.statusText}`);
+      }
+      
       const vendasData = await vendasRes.json();
       setVendas(vendasData.vendas || []);
     } catch (error) {
       console.error('Erro ao carregar dados:', error);
-      alert('Erro ao carregar dados da dashboard');
+      alert(`Erro ao carregar dados da dashboard: ${error.message}`);
     } finally {
       setCarregando(false);
     }
