@@ -30,11 +30,8 @@
       // Silenciar erro - Facebook Pixel pode estar bloqueado
     }
     
-    // Exibir ID da transação
-    const transactionIdElement = document.getElementById('transactionId');
-    if (transactionIdElement) {
-      transactionIdElement.textContent = transactionId;
-    }
+    // ID da transação já é exibido pelo React (não precisa atualizar aqui)
+    // Mantido apenas para compatibilidade caso o script seja carregado antes do React
     
     // Salvar dados da conversão no Database (se disponível)
     if (typeof Database !== 'undefined') {

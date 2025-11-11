@@ -86,7 +86,20 @@ export default function Home() {
       <Head>
         <title>Privacy | Marcelly Mar 😘</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="description" content="Conteúdo exclusivo da Marcelly Mar. Acesse fotos e vídeos premium." />
+        <meta name="keywords" content="Marcelly Mar, conteúdo exclusivo, privacy, fotos, vídeos" />
         <link rel="icon" type="image/png" href="/images/favicon.png" />
+        
+        {/* Open Graph / Facebook */}
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="Privacy | Marcelly Mar" />
+        <meta property="og:description" content="Conteúdo exclusivo da Marcelly Mar. Acesse fotos e vídeos premium." />
+        <meta property="og:image" content="/images/banner.jpg" />
+        
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Privacy | Marcelly Mar" />
+        <meta name="twitter:description" content="Conteúdo exclusivo da Marcelly Mar. Acesse fotos e vídeos premium." />
       </Head>
       
       {/* Tailwind CDN */}

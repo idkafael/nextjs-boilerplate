@@ -9,7 +9,11 @@ export default function ModalPagamento({ aberto, fechar, valor, plano }) {
           <div className="bg-gradient-to-r from-orange-500 to-pink-500 text-white p-6 rounded-t-2xl">
             <div className="flex justify-between items-center">
               <h3 className="text-xl font-bold">Pagamento PIX</h3>
-              <button onClick={fechar} className="text-white hover:text-gray-200">
+              <button 
+                onClick={fechar} 
+                className="text-white hover:text-gray-200 focus:outline-none focus:ring-2 focus:ring-white rounded"
+                aria-label="Fechar modal de pagamento"
+              >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
@@ -50,14 +54,39 @@ export default function ModalPagamento({ aberto, fechar, valor, plano }) {
                 />
               </div>
               <button 
-                onClick={() => {
+                onClick={async (e) => {
                   const input = document.getElementById('pixCodeInput');
+                  const button = e.target;
                   if (input && input.value) {
-                    input.select();
-                    document.execCommand('copy');
+                    try {
+                      input.select();
+                      await navigator.clipboard.writeText(input.value);
+                      
+                      // Feedback visual
+                      const textoOriginal = button.textContent;
+                      button.textContent = '✓ Copiado!';
+                      button.classList.add('bg-green-500');
+                      button.classList.remove('bg-blue-500');
+                      
+                      setTimeout(() => {
+                        button.textContent = textoOriginal;
+                        button.classList.remove('bg-green-500');
+                        button.classList.add('bg-blue-500');
+                      }, 2000);
+                    } catch (err) {
+                      // Fallback para navegadores antigos
+                      input.select();
+                      document.execCommand('copy');
+                      const textoOriginal = button.textContent;
+                      button.textContent = '✓ Copiado!';
+                      setTimeout(() => {
+                        button.textContent = textoOriginal;
+                      }, 2000);
+                    }
                   }
                 }} 
-                className="mt-2 w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors"
+                className="mt-2 w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-300"
+                aria-label="Copiar código PIX"
               >
                 Copiar Código PIX
               </button>

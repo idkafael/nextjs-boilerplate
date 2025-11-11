@@ -4,13 +4,21 @@ import { useRouter } from 'next/router';
 
 export default function Agradecimento() {
   const router = useRouter();
+  const { id, valor, status } = router.query;
+  
+  // Valores dinâmicos da URL ou padrões
+  const transactionId = id || 'N/A';
+  const valorExibido = valor || '9,90';
+  const statusPagamento = status || 'paid';
 
   return (
     <>
       <Head>
         <title>Pagamento Confirmado - Marcelly Mar</title>
-        <meta charset="UTF-8" />
+        <meta charSet="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="description" content="Pagamento confirmado! Acesse seu conteúdo exclusivo da Marcelly Mar." />
+        <meta name="robots" content="noindex, nofollow" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet" />
       </Head>
 
@@ -93,7 +101,7 @@ export default function Agradecimento() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Valor:</span>
-                  <span className="font-semibold text-green-600">R$ 9,90</span>
+                  <span className="font-semibold text-green-600">R$ {valorExibido}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Status:</span>
@@ -101,7 +109,7 @@ export default function Agradecimento() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">ID da Transação:</span>
-                  <span className="font-mono text-xs text-gray-500" id="transactionId">-</span>
+                  <span className="font-mono text-xs text-gray-500" id="transactionId">{transactionId}</span>
                 </div>
               </div>
             </div>
@@ -120,7 +128,8 @@ export default function Agradecimento() {
                 href="https://drive.google.com/drive/folders/1ff951SXT9sZRmwGwwvoHh6ePr4_Y2fDo?usp=sharing"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block w-full bg-gradient-to-r from-orange-500 to-pink-500 text-white font-bold py-5 px-6 rounded-lg hover:from-orange-600 hover:to-pink-600 transition-all transform hover:scale-105 pulse-animation text-center"
+                className="block w-full bg-gradient-to-r from-orange-500 to-pink-500 text-white font-bold py-5 px-6 rounded-lg hover:from-orange-600 hover:to-pink-600 transition-all transform hover:scale-105 pulse-animation text-center focus:outline-none focus:ring-4 focus:ring-orange-300"
+                aria-label="Acessar conteúdo exclusivo no Google Drive"
               >
                 <div className="flex items-center justify-center space-x-3">
                   <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
@@ -165,12 +174,12 @@ export default function Agradecimento() {
               <button 
                 onClick={() => {
                   if (typeof window !== 'undefined') {
-                    const transactionId = new URLSearchParams(window.location.search).get('id') || 'N/A';
                     const mensagem = `Olá! Acabei de fazer o pagamento.\\n\\nID da Transação: ${transactionId}\\n\\nPreciso de ajuda para acessar o conteúdo.`;
                     window.open(`https://wa.me/5547997118690?text=${encodeURIComponent(mensagem)}`, '_blank');
                   }
                 }}
-                className="bg-green-500 text-white py-3 px-4 rounded-lg hover:bg-green-600 transition-colors font-medium"
+                className="bg-green-500 text-white py-3 px-4 rounded-lg hover:bg-green-600 transition-colors font-medium focus:outline-none focus:ring-2 focus:ring-green-300"
+                aria-label="Abrir WhatsApp para pedir ajuda"
               >
                 💬 Ajuda
               </button>
