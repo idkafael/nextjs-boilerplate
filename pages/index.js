@@ -489,7 +489,7 @@ export default function Home() {
                   window.fbq.queue = [];
                 }
                 try {
-                  var pixelId = ${JSON.stringify(pixelId)};
+                  var pixelId = '${pixelId.replace(/'/g, "\\'")}';
                   if (pixelId && pixelId !== 'SEU_PIXEL_ID_AQUI') {
                     fbq('init', pixelId);
                     fbq('track', 'PageView');
