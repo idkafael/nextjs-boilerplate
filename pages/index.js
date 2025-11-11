@@ -483,18 +483,21 @@ export default function Home() {
             id="fb-pixel-init" 
             strategy="afterInteractive"
             dangerouslySetInnerHTML={{
-              __html: `
+              __html: `(function() {
                 if (typeof fbq === 'undefined') {
                   window.fbq = function() {};
                   window.fbq.queue = [];
                 }
                 try {
-                  fbq('init', '${pixelId}');
-                  fbq('track', 'PageView');
+                  var pixelId = ${JSON.stringify(pixelId)};
+                  if (pixelId && pixelId !== 'SEU_PIXEL_ID_AQUI') {
+                    fbq('init', pixelId);
+                    fbq('track', 'PageView');
+                  }
                 } catch(e) {
-                  console.info('FB Pixel bloqueado');
+                  console.info('FB Pixel bloqueado ou erro:', e);
                 }
-              `
+              })();`
             }}
           />
         </>

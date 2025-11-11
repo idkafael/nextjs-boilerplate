@@ -96,12 +96,21 @@ const PushinPayReal = {
   exibirQRCode(qrCodeBase64) {
     const qrDiv = document.getElementById('qrCode');
     if (qrDiv && qrCodeBase64) {
-      // Se já tem o prefixo data:, usar direto, senão adicionar
+      // Limpar conteúdo anterior
+      qrDiv.innerHTML = '';
+      
+      // Criar imagem de forma segura
+      const img = document.createElement('img');
       let imageSrc = qrCodeBase64;
       if (!qrCodeBase64.startsWith('data:')) {
         imageSrc = `data:image/png;base64,${qrCodeBase64}`;
       }
-      qrDiv.innerHTML = `<img src="${imageSrc}" alt="QR Code PIX" class="mx-auto max-w-xs" style="max-width: 256px;" />`;
+      img.src = imageSrc;
+      img.alt = 'QR Code PIX';
+      img.className = 'mx-auto max-w-xs';
+      img.style.maxWidth = '256px';
+      
+      qrDiv.appendChild(img);
       console.log('✅ QR Code exibido');
     } else {
       console.warn('⚠️ QR Code base64 não disponível ou elemento qrCode não encontrado');
@@ -119,19 +128,28 @@ const PushinPayReal = {
   atualizarStatus(mensagem, isError = false) {
     const statusDiv = document.getElementById('paymentStatus');
     if (statusDiv) {
-      const colorClass = isError ? 'text-red-600' : 'text-orange-600';
-      const icon = isError ? '' : `
-        <svg class="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-        </svg>
-      `;
+      // Limpar conteúdo anterior
+      statusDiv.innerHTML = '';
       
-      statusDiv.innerHTML = `
-        <div class="flex items-center justify-center space-x-2 ${colorClass}">
-          ${icon}
-          <span>${mensagem}</span>
-        </div>
-      `;
+      // Criar elementos de forma segura
+      const container = document.createElement('div');
+      container.className = `flex items-center justify-center space-x-2 ${isError ? 'text-red-600' : 'text-orange-600'}`;
+      
+      if (!isError) {
+        const icon = document.createElement('svg');
+        icon.className = 'w-5 h-5 animate-spin';
+        icon.setAttribute('fill', 'none');
+        icon.setAttribute('stroke', 'currentColor');
+        icon.setAttribute('viewBox', '0 0 24 24');
+        icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>';
+        container.appendChild(icon);
+      }
+      
+      const span = document.createElement('span');
+      span.textContent = mensagem;
+      container.appendChild(span);
+      
+      statusDiv.appendChild(container);
     }
   },
   
