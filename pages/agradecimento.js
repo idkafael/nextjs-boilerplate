@@ -8,7 +8,7 @@ export default function Agradecimento() {
   return (
     <>
       <Head>
-        <title>Pagamento Confirmado - Maria Fernanda</title>
+        <title>Pagamento Confirmado - Marcelly Mar</title>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet" />
@@ -78,7 +78,7 @@ export default function Agradecimento() {
               </svg>
             </div>
             <h1 className="text-3xl font-bold mt-4 mb-2">Pagamento Confirmado!</h1>
-            <p className="text-green-100">Obrigado por assinar o conteúdo da Maria Fernanda</p>
+            <p className="text-green-100">Obrigado por assinar o conteúdo da Marcelly Mar</p>
           </div>
           
           {/* Conteúdo Principal */}
@@ -117,7 +117,7 @@ export default function Agradecimento() {
               
               {/* Botão Principal - Google Drive */}
               <a 
-                href="https://drive.google.com/drive/folders/1DyiYRj4RcprijgHq3Q6YRgnAQ9uDoV_S?usp=sharing"
+                href="https://drive.google.com/drive/folders/1ff951SXT9sZRmwGwwvoHh6ePr4_Y2fDo?usp=sharing"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="block w-full bg-gradient-to-r from-orange-500 to-pink-500 text-white font-bold py-5 px-6 rounded-lg hover:from-orange-600 hover:to-pink-600 transition-all transform hover:scale-105 pulse-animation text-center"

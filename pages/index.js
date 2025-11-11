@@ -41,16 +41,36 @@ export default function Home() {
     setCurrentPlan(plano);
     setModalAberto(true);
 
-    if (typeof window !== 'undefined' && window.PushinPayReal) {
-      try {
-        window.PushinPayReal.atualizarValorPlano(valor, plano);
-        await window.PushinPayReal.criarPix();
-      } catch (error) {
-        console.error('Erro ao processar pagamento:', error);
-      
-      }
-    } else {
-      console.error('PushinPayReal não está disponível');
+    // Aguardar até que o script PushinPayReal esteja disponível
+    const aguardarPushinPay = () => {
+      return new Promise((resolve, reject) => {
+        if (typeof window !== 'undefined' && window.PushinPayReal) {
+          resolve(window.PushinPayReal);
+          return;
+        }
+        
+        // Tentar aguardar até 5 segundos
+        let tentativas = 0;
+        const intervalo = setInterval(() => {
+          tentativas++;
+          if (typeof window !== 'undefined' && window.PushinPayReal) {
+            clearInterval(intervalo);
+            resolve(window.PushinPayReal);
+          } else if (tentativas >= 50) { // 5 segundos (50 * 100ms)
+            clearInterval(intervalo);
+            reject(new Error('PushinPayReal não carregou a tempo'));
+          }
+        }, 100);
+      });
+    };
+
+    try {
+      const pushinPay = await aguardarPushinPay();
+      pushinPay.atualizarValorPlano(valor, plano);
+      await pushinPay.criarPix();
+    } catch (error) {
+      console.error('❌ Erro ao processar pagamento:', error);
+      alert('Erro ao gerar pagamento. Por favor, recarregue a página e tente novamente.');
     }
   };
 
@@ -497,12 +517,12 @@ export default function Home() {
       />
       <Script 
         src="/js/pushinpay-real.js" 
-        strategy="lazyOnload"
+        strategy="afterInteractive"
         onLoad={() => {
-          console.log('PushinPayReal carregado');
+          console.log('✅ PushinPayReal carregado e pronto');
         }}
         onError={(e) => {
-          console.error('Erro ao carregar pushinpay-real.js:', e);
+          console.error('❌ Erro ao carregar pushinpay-real.js:', e);
         }}
       />
     </>

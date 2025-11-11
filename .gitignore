@@ -71,3 +71,7 @@ database.json
 # Backups locais
 backup/
 
+# Dados de vendas
+data/
+vendas.json
+

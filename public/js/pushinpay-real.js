@@ -196,11 +196,15 @@ const PushinPayReal = {
         console.log('📊 Status do pagamento:', status, '| Dados completos:', data);
         
         // Verificar se o pagamento foi confirmado
-        // Status possíveis: paid, approved, confirmed, completed, success
-        const statusConfirmado = ['paid', 'approved', 'confirmed', 'completed', 'success'];
+        // Status possíveis: paid, approved, confirmed, completed, success, pago, aprovado
+        const statusConfirmado = ['paid', 'approved', 'confirmed', 'completed', 'success', 'pago', 'aprovado'];
         const isPagamentoConfirmado = statusConfirmado.includes(status) || 
                                        data.paid === true || 
-                                       data.confirmed === true;
+                                       data.confirmed === true ||
+                                       data.status_pagamento === 'pago' ||
+                                       data.payment_status === 'paid' ||
+                                       (data.status && data.status.toLowerCase() === 'paid') ||
+                                       (data.payment && data.payment.status === 'paid');
         
         if (isPagamentoConfirmado) {
           console.log('✅✅✅ PAGAMENTO CONFIRMADO! Redirecionando para agradecimento...');
@@ -216,6 +220,10 @@ const PushinPayReal = {
             }
           }));
           
+          // Nota: A venda será salva automaticamente pelo webhook da PushinPay
+          // quando o pagamento for confirmado. Não precisamos salvar aqui no frontend
+          // para manter a segurança (evitar expor tokens).
+
           // Evento Facebook Pixel
           if (typeof fbq !== 'undefined') {
             try {
@@ -242,8 +250,24 @@ const PushinPayReal = {
           
           // Redirecionar após 1 segundo (tempo suficiente para mostrar mensagem)
           setTimeout(() => {
-            console.log('🔄 Redirecionando para:', `/agradecimento?${urlParams.toString()}`);
-            window.location.href = `/agradecimento?${urlParams.toString()}`;
+            const urlAgradecimento = `/agradecimento?${urlParams.toString()}`;
+            console.log('🔄 Redirecionando para:', urlAgradecimento);
+            
+            // Tentar múltiplos métodos de redirecionamento para garantir que funcione
+            try {
+              // Método 1: window.location.href (padrão)
+              window.location.href = urlAgradecimento;
+            } catch (error) {
+              console.warn('⚠️ Erro com window.location.href, tentando window.location.replace:', error);
+              try {
+                // Método 2: window.location.replace (fallback)
+                window.location.replace(urlAgradecimento);
+              } catch (error2) {
+                console.error('❌ Erro com window.location.replace, tentando window.location.assign:', error2);
+                // Método 3: window.location.assign (último recurso)
+                window.location.assign(urlAgradecimento);
+              }
+            }
           }, 1000);
           
         } else if (status === 'pending' || status === 'waiting' || status === 'processing') {

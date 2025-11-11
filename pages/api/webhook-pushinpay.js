@@ -44,6 +44,34 @@ export default async function handler(req, res) {
     if (status === 'paid' || status === 'confirmed' || status === 'approved') {
       console.log('✅ Pagamento confirmado! ID:', id);
 
+      // Salvar venda no sistema
+      try {
+        const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+        const dashboardToken = process.env.DASHBOARD_TOKEN || 'admin123';
+        
+        await fetch(`${baseUrl}/api/vendas`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${dashboardToken}`
+          },
+          body: JSON.stringify({
+            transactionId: id,
+            valor: (value / 100).toFixed(2),
+            plano: 'Vitalício',
+            status: 'paid',
+            metadata: {
+              payer: payer?.name || 'Não informado',
+              payment_method: payment_method || 'PIX',
+              paid_at: paid_at || new Date().toISOString()
+            }
+          })
+        });
+        console.log('✅ Venda salva no sistema');
+      } catch (error) {
+        console.error('Erro ao salvar venda:', error);
+      }
+
       // Aqui você pode:
       // 1. Salvar no banco de dados
       // 2. Enviar email de confirmação
