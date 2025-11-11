@@ -1,6 +1,20 @@
 // API Route para estatísticas de vendas
 
-import { lerVendas } from '../../lib/vendasStorage';
+// Armazenamento em memória (compartilhado com /api/vendas)
+// NOTA: Em serverless, cada instância tem sua própria memória
+let vendasStorage = [];
+
+function lerVendas() {
+  return Array.isArray(vendasStorage) ? vendasStorage : [];
+}
+
+// Sincronizar com o armazenamento de vendas
+// Em produção, isso deve vir de um banco de dados compartilhado
+function sincronizarVendas() {
+  // Por enquanto, retornar apenas o que temos em memória
+  // Em produção, fazer uma chamada para o banco de dados
+  return lerVendas();
+}
 
 export default async function handler(req, res) {
   // Verificar autenticação básica
@@ -16,12 +30,32 @@ export default async function handler(req, res) {
   }
 
   try {
-    const vendas = lerVendas();
+    // Tentar buscar vendas da API de vendas para sincronizar
+    // Isso garante que temos os dados mais recentes
+    try {
+      const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || req.headers.origin || '';
+      if (baseUrl) {
+        const vendasRes = await fetch(`${baseUrl}/api/vendas`, {
+          headers: {
+            'Authorization': authHeader
+          }
+        });
+        if (vendasRes.ok) {
+          const vendasData = await vendasRes.json();
+          vendasStorage = vendasData.vendas || [];
+        }
+      }
+    } catch (syncError) {
+      // Se não conseguir sincronizar, usar dados locais
+      console.log('Não foi possível sincronizar vendas, usando dados locais');
+    }
+    
+    const vendas = sincronizarVendas();
     const vendasPagas = vendas.filter(v => v.status === 'paid' || v.status === 'pago');
     
     // Estatísticas gerais
     const totalVendas = vendasPagas.length;
-    const totalReceita = vendasPagas.reduce((sum, v) => sum + v.valor, 0);
+    const totalReceita = vendasPagas.reduce((sum, v) => sum + (v.valor || 0), 0);
     const ticketMedio = totalVendas > 0 ? totalReceita / totalVendas : 0;
     
     // Vendas por plano
@@ -37,24 +71,24 @@ export default async function handler(req, res) {
     const trintaDiasAtras = new Date(hoje.getTime() - 30 * 24 * 60 * 60 * 1000);
     
     vendasPagas
-      .filter(v => new Date(v.timestamp) >= trintaDiasAtras)
+      .filter(v => v.timestamp && new Date(v.timestamp) >= trintaDiasAtras)
       .forEach(v => {
         const data = new Date(v.timestamp).toISOString().split('T')[0];
         if (!vendasPorDia[data]) {
           vendasPorDia[data] = { vendas: 0, receita: 0 };
         }
         vendasPorDia[data].vendas += 1;
-        vendasPorDia[data].receita += v.valor;
+        vendasPorDia[data].receita += (v.valor || 0);
       });
     
     // Vendas hoje
     const hojeStr = hoje.toISOString().split('T')[0];
     const vendasHoje = vendasPagas.filter(v => 
-      v.timestamp.startsWith(hojeStr)
+      v.timestamp && v.timestamp.startsWith(hojeStr)
     ).length;
     const receitaHoje = vendasPagas
-      .filter(v => v.timestamp.startsWith(hojeStr))
-      .reduce((sum, v) => sum + v.valor, 0);
+      .filter(v => v.timestamp && v.timestamp.startsWith(hojeStr))
+      .reduce((sum, v) => sum + (v.valor || 0), 0);
     
     // Vendas esta semana
     const inicioSemana = new Date(hoje);
@@ -62,20 +96,20 @@ export default async function handler(req, res) {
     inicioSemana.setHours(0, 0, 0, 0);
     
     const vendasSemana = vendasPagas.filter(v => 
-      new Date(v.timestamp) >= inicioSemana
+      v.timestamp && new Date(v.timestamp) >= inicioSemana
     ).length;
     const receitaSemana = vendasPagas
-      .filter(v => new Date(v.timestamp) >= inicioSemana)
-      .reduce((sum, v) => sum + v.valor, 0);
+      .filter(v => v.timestamp && new Date(v.timestamp) >= inicioSemana)
+      .reduce((sum, v) => sum + (v.valor || 0), 0);
     
     // Vendas este mês
     const inicioMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
     const vendasMes = vendasPagas.filter(v => 
-      new Date(v.timestamp) >= inicioMes
+      v.timestamp && new Date(v.timestamp) >= inicioMes
     ).length;
     const receitaMes = vendasPagas
-      .filter(v => new Date(v.timestamp) >= inicioMes)
-      .reduce((sum, v) => sum + v.valor, 0);
+      .filter(v => v.timestamp && new Date(v.timestamp) >= inicioMes)
+      .reduce((sum, v) => sum + (v.valor || 0), 0);
     
     return res.status(200).json({
       totalVendas,
@@ -100,7 +134,8 @@ export default async function handler(req, res) {
     console.error('Erro ao calcular estatísticas:', error);
     return res.status(500).json({ 
       error: 'Erro ao calcular estatísticas',
-      message: error.message 
+      message: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
 }

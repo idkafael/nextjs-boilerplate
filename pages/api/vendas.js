@@ -5,7 +5,17 @@
 // NOTA: Na Vercel (serverless), usamos armazenamento em memória
 // Para produção, considere migrar para um banco de dados (MongoDB, PostgreSQL, etc.)
 
-import { lerVendas, salvarVendas } from '../../lib/vendasStorage';
+// Armazenamento em memória (compartilhado entre requisições na mesma instância)
+let vendasStorage = [];
+
+function lerVendas() {
+  return Array.isArray(vendasStorage) ? vendasStorage : [];
+}
+
+function salvarVendas(vendas) {
+  vendasStorage = Array.isArray(vendas) ? vendas : [];
+  return true;
+}
 
 export default async function handler(req, res) {
   // Verificar autenticação básica
@@ -59,7 +69,8 @@ export default async function handler(req, res) {
       console.error('Erro ao buscar vendas:', error);
       return res.status(500).json({ 
         error: 'Erro ao buscar vendas',
-        message: error.message 
+        message: error.message,
+        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
       });
     }
   }
@@ -104,7 +115,8 @@ export default async function handler(req, res) {
       console.error('Erro ao salvar venda:', error);
       return res.status(500).json({ 
         error: 'Erro ao salvar venda',
-        message: error.message 
+        message: error.message,
+        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
       });
     }
   }
