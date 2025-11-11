@@ -20,7 +20,7 @@ export default function Home() {
     
     // Verificar se estamos no cliente antes de acessar process.env
     if (typeof window !== 'undefined') {
-      const pixelIdValue = process.env.NEXT_PUBLIC_FACEBOOK_PIXEL_ID || 'SEU_PIXEL_ID_AQUI';
+      const pixelIdValue = process.env.NEXT_PUBLIC_FACEBOOK_PIXEL_ID || '856032176652340';
       setPixelId(pixelIdValue);
       
       // Definir imageVersion apenas no cliente para evitar erro de hidratação

@@ -34,7 +34,7 @@ Crie um arquivo `.env.local` na raiz do projeto:
 PUSHINPAY_TOKEN=seu_token_pushinpay_aqui
 
 # Facebook Pixel
-NEXT_PUBLIC_FACEBOOK_PIXEL_ID=seu_pixel_id_aqui
+NEXT_PUBLIC_FACEBOOK_PIXEL_ID=856032176652340
 
 # Telegram Bot
 TELEGRAM_BOT_TOKEN=seu_bot_token_aqui
