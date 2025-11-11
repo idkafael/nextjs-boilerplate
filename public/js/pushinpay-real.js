@@ -152,10 +152,24 @@ const PushinPayReal = {
     this.pararVerificacao(); // Garantir que não há múltiplas verificações
     
     let tentativas = 0;
-    const maxTentativas = 100; // Limitar a 100 tentativas (5 minutos)
+    const maxTentativas = 300; // Limitar a 300 tentativas (5 horas com intervalo de 1 minuto)
+    let ultimaConsulta = 0; // Timestamp da última consulta
     
     this.estado.intervaloVerificacao = setInterval(async () => {
       tentativas++;
+      
+      // IMPORTANTE: Respeitar limite da API - consultas a cada 1 minuto mínimo
+      // Conforme documentação: "Consultas diretas são autorizadas a cada 1 minuto"
+      const agora = Date.now();
+      const tempoDesdeUltimaConsulta = agora - ultimaConsulta;
+      const intervaloMinimo = 60000; // 1 minuto em milissegundos
+      
+      if (tempoDesdeUltimaConsulta < intervaloMinimo && ultimaConsulta > 0) {
+        // Aguardar até completar 1 minuto desde a última consulta
+        const tempoRestante = intervaloMinimo - tempoDesdeUltimaConsulta;
+        console.log(`⏳ Aguardando ${Math.ceil(tempoRestante / 1000)}s antes da próxima consulta (limite da API: 1 minuto)`);
+        return;
+      }
       
       // Parar após muitas tentativas para evitar loop infinito
       if (tentativas > maxTentativas) {
@@ -164,6 +178,8 @@ const PushinPayReal = {
         this.atualizarStatus('⏱️ Tempo de verificação expirado. Gere um novo QR Code.', true);
         return;
       }
+      
+      ultimaConsulta = agora; // Atualizar timestamp da última consulta
       try {
         const response = await fetch(`${this.config.baseUrl}/pushinpay`, {
           method: 'POST',
@@ -191,20 +207,27 @@ const PushinPayReal = {
           return;
         }
         
+        // Se for 404, a transação não foi encontrada (ainda não existe ou foi removida)
+        if (response.status === 404) {
+          console.log('⏳ Transação ainda não encontrada na API (aguardando criação)...');
+          return;
+        }
+        
         const data = await response.json();
-        const status = data.status?.toLowerCase() || data.payment_status?.toLowerCase() || 'unknown';
+        
+        // Verificar se é array vazio (404 retorna array vazio conforme documentação)
+        if (Array.isArray(data) && data.length === 0) {
+          console.log('⏳ Transação ainda não encontrada (array vazio)...');
+          return;
+        }
+        
+        // Status conforme documentação oficial: "created" | "paid" | "canceled"
+        const status = data.status?.toLowerCase() || 'unknown';
         console.log('📊 Status do pagamento:', status, '| Dados completos:', data);
         
         // Verificar se o pagamento foi confirmado
-        // Status possíveis: paid, approved, confirmed, completed, success, pago, aprovado
-        const statusConfirmado = ['paid', 'approved', 'confirmed', 'completed', 'success', 'pago', 'aprovado'];
-        const isPagamentoConfirmado = statusConfirmado.includes(status) || 
-                                       data.paid === true || 
-                                       data.confirmed === true ||
-                                       data.status_pagamento === 'pago' ||
-                                       data.payment_status === 'paid' ||
-                                       (data.status && data.status.toLowerCase() === 'paid') ||
-                                       (data.payment && data.payment.status === 'paid');
+        // Status "paid" conforme documentação oficial da PushinPay
+        const isPagamentoConfirmado = status === 'paid';
         
         if (isPagamentoConfirmado) {
           console.log('✅✅✅ PAGAMENTO CONFIRMADO! Redirecionando para agradecimento...');
@@ -270,13 +293,13 @@ const PushinPayReal = {
             }
           }, 1000);
           
-        } else if (status === 'pending' || status === 'waiting' || status === 'processing') {
-          // Pagamento ainda pendente, continuar verificando
-          console.log('⏳ Aguardando pagamento... Status:', status);
-        } else if (status === 'cancelled' || status === 'canceled' || status === 'expired' || status === 'failed') {
-          // Pagamento cancelado ou expirado
-          console.log('❌ Pagamento cancelado ou expirado. Status:', status);
-          this.atualizarStatus('❌ Pagamento cancelado ou expirado. Gere um novo QR Code.');
+        } else if (status === 'created') {
+          // Pagamento criado mas ainda não pago, continuar verificando
+          console.log('⏳ Aguardando pagamento... Status: created');
+        } else if (status === 'canceled') {
+          // Pagamento cancelado conforme documentação
+          console.log('❌ Pagamento cancelado. Status:', status);
+          this.atualizarStatus('❌ Pagamento cancelado. Gere um novo QR Code.', true);
           this.pararVerificacao();
         } else {
           // Status desconhecido, continuar verificando por segurança
@@ -284,10 +307,12 @@ const PushinPayReal = {
         }
       } catch (error) {
         console.error('Erro ao verificar pagamento:', error);
+        // Em caso de erro, aguardar 1 minuto antes de tentar novamente
+        ultimaConsulta = Date.now();
       }
-    }, 3000); // Verificar a cada 3 segundos (otimizado para resposta rápida)
+    }, 10000); // Verificar a cada 10 segundos (mas respeitando limite de 1 minuto da API)
     
-    console.log('✅ Verificação automática iniciada - Checando a cada 3 segundos');
+    console.log('✅ Verificação automática iniciada - Respeitando limite de 1 minuto entre consultas');
   },
   
   pararVerificacao() {
