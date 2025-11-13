@@ -23,15 +23,27 @@ async function getBearerToken() {
   // Endpoints são: /api/partner/v1/*
   let apiBaseUrl = process.env.SYNCPAY_API_URL;
   
+  // Debug: Log para verificar se a variável está sendo lida
+  console.log('🔍 Debug - Variáveis de ambiente:', {
+    hasApiUrl: !!apiBaseUrl,
+    apiUrlLength: apiBaseUrl?.length || 0,
+    apiUrlPreview: apiBaseUrl ? `${apiBaseUrl.substring(0, 30)}...` : 'undefined',
+    hasClientId: !!clientId,
+    hasClientSecret: !!clientSecret,
+    isVercel: !!process.env.VERCEL
+  });
+  
   // Remover barra final se houver (para evitar URLs duplicadas)
   if (apiBaseUrl && apiBaseUrl.endsWith('/')) {
     apiBaseUrl = apiBaseUrl.slice(0, -1);
+    console.log('🔧 Barra final removida da URL:', apiBaseUrl);
   }
   
   if (!apiBaseUrl) {
     const envHint = process.env.VERCEL 
-      ? 'Configure SYNCPAY_API_URL nas Environment Variables da Vercel (Settings → Environment Variables)'
+      ? 'Configure SYNCPAY_API_URL nas Environment Variables da Vercel (Settings → Environment Variables). Verifique se está marcado para Production.'
       : 'Configure SYNCPAY_API_URL no arquivo .env.local';
+    console.error('❌ SYNCPAY_API_URL não encontrado. Variáveis disponíveis:', Object.keys(process.env).filter(k => k.includes('SYNCPAY')));
     throw new Error(`SYNCPAY_API_URL não está configurado. ${envHint}. URL base: https://api.syncpayments.com.br`);
   }
 
