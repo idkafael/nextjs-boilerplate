@@ -209,11 +209,19 @@ export default async function handler(req, res) {
   
   // Se não tiver a variável, retornar erro detalhado
   if (!process.env.SYNCPAY_API_URL) {
+    // Tentar usar valor padrão se não estiver configurado (temporário para diagnóstico)
+    const defaultApiUrl = 'https://api.syncpayments.com.br';
+    console.warn('⚠️ SYNCPAY_API_URL não encontrado, usando valor padrão:', defaultApiUrl);
+    
     return res.status(500).json({
       error: 'SYNCPAY_API_URL não está configurado',
       message: 'Configure SYNCPAY_API_URL nas Environment Variables da Vercel (Settings → Environment Variables). Verifique se está marcado para Production.',
-      debug: envVars,
-      suggestion: 'Verifique os logs da Vercel para ver quais variáveis estão disponíveis'
+      debug: {
+        ...envVars,
+        allEnvKeys: Object.keys(process.env).filter(k => k.includes('SYNC') || k.includes('VERCEL')).slice(0, 20)
+      },
+      suggestion: 'Verifique os logs da Vercel para ver quais variáveis estão disponíveis. A variável deve estar marcada para Production, Preview e Development.',
+      defaultUrl: defaultApiUrl
     });
   }
 
