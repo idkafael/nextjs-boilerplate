@@ -59,6 +59,34 @@ export default async function handler(req, res) {
 
   const { action } = req.body;
 
+  // Endpoint de debug para verificar variáveis (apenas em desenvolvimento ou com token especial)
+  if (action === 'debug-env') {
+    const debugToken = req.body.debugToken;
+    // Permitir apenas se for localhost ou com token de debug
+    const isLocal = !process.env.VERCEL;
+    const isValidDebugToken = debugToken === process.env.DEBUG_TOKEN || debugToken === 'debug-2025-11-13';
+    
+    if (!isLocal && !isValidDebugToken) {
+      return res.status(403).json({ error: 'Acesso negado' });
+    }
+    
+    return res.status(200).json({
+      environment: process.env.VERCEL ? 'Vercel' : 'Local',
+      vercelEnv: process.env.VERCEL_ENV || 'unknown',
+      hasApiToken: !!process.env.IRONPAY_API_TOKEN,
+      apiTokenLength: process.env.IRONPAY_API_TOKEN ? process.env.IRONPAY_API_TOKEN.length : 0,
+      apiTokenPreview: process.env.IRONPAY_API_TOKEN ? process.env.IRONPAY_API_TOKEN.substring(0, 20) + '...' : 'NÃO CONFIGURADO',
+      hasApiUrl: !!process.env.IRONPAY_API_URL,
+      apiUrl: process.env.IRONPAY_API_URL || 'NÃO CONFIGURADO',
+      hasProductHash: !!process.env.IRONPAY_PRODUCT_HASH,
+      productHash: process.env.IRONPAY_PRODUCT_HASH || 'NÃO CONFIGURADO',
+      hasOfferHash: !!process.env.IRONPAY_OFFER_HASH,
+      offerHash: process.env.IRONPAY_OFFER_HASH || 'NÃO CONFIGURADO',
+      allIronPayVars: Object.keys(process.env).filter(k => k.includes('IRONPAY')),
+      allEnvKeys: Object.keys(process.env).filter(k => k.startsWith('IRONPAY') || k.startsWith('NEXT_PUBLIC')).sort()
+    });
+  }
+
   try {
     if (action === 'create-pix') {
       const { valor, plano, client, currency } = req.body;
@@ -71,18 +99,34 @@ export default async function handler(req, res) {
       if (!apiToken) {
         const isVercel = !!process.env.VERCEL;
         const errorMessage = isVercel 
-          ? 'IRONPAY_API_TOKEN não configurado. As variáveis foram adicionadas DEPOIS do último deploy. Faça um REDEPLOY na Vercel para aplicar as novas variáveis.'
+          ? 'IRONPAY_API_TOKEN não configurado. Verifique: 1) Variáveis configuradas em Settings → Environment Variables, 2) Variáveis marcadas para Production, 3) Redeploy feito após adicionar variáveis.'
           : 'Configure IRONPAY_API_TOKEN nas variáveis de ambiente';
+        
+        // Log detalhado para debug
+        console.error('❌ ERRO: IRONPAY_API_TOKEN não encontrado!');
+        console.error('🔍 Debug completo:', {
+          isVercel: isVercel,
+          vercelEnv: process.env.VERCEL_ENV,
+          allIronPayKeys: Object.keys(process.env).filter(k => k.includes('IRONPAY')),
+          processEnvKeys: Object.keys(process.env).length,
+          nodeEnv: process.env.NODE_ENV
+        });
         
         return res.status(500).json({
           error: 'IRONPAY_API_TOKEN não configurado',
           message: errorMessage,
+          debug: {
+            isVercel: isVercel,
+            vercelEnv: process.env.VERCEL_ENV,
+            hasAnyIronPayVar: Object.keys(process.env).some(k => k.includes('IRONPAY')),
+            allIronPayKeys: Object.keys(process.env).filter(k => k.includes('IRONPAY'))
+          },
           solution: isVercel ? {
-            step1: 'Acesse: https://vercel.com/dashboard',
-            step2: 'Abra o projeto marprivacy.site',
-            step3: 'Vá em Deployments → Clique nos 3 pontos (⋯) do último deploy',
-            step4: 'Selecione "Redeploy"',
-            step5: 'Aguarde o build completar (~2-3 minutos)'
+            step1: 'Verifique Settings → Environment Variables → IRONPAY_API_TOKEN existe',
+            step2: 'Verifique se está marcado para "Production"',
+            step3: 'Vá em Deployments → Clique nos 3 pontos (⋯) → Redeploy',
+            step4: 'Aguarde o build completar',
+            step5: 'Verifique logs do deploy em Functions → api/syncpay'
           } : 'Adicione IRONPAY_API_TOKEN no arquivo .env.local e reinicie o servidor'
         });
       }
