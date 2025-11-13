@@ -41,11 +41,11 @@ export default function Home() {
     setCurrentPlan(plano);
     setModalAberto(true);
 
-    // Aguardar até que o script PushinPayReal esteja disponível
-    const aguardarPushinPay = () => {
+    // Aguardar até que o script SyncPayReal esteja disponível
+    const aguardarSyncPay = () => {
       return new Promise((resolve, reject) => {
-        if (typeof window !== 'undefined' && window.PushinPayReal) {
-          resolve(window.PushinPayReal);
+        if (typeof window !== 'undefined' && window.SyncPayReal) {
+          resolve(window.SyncPayReal);
           return;
         }
         
@@ -53,21 +53,21 @@ export default function Home() {
         let tentativas = 0;
         const intervalo = setInterval(() => {
           tentativas++;
-          if (typeof window !== 'undefined' && window.PushinPayReal) {
+          if (typeof window !== 'undefined' && window.SyncPayReal) {
             clearInterval(intervalo);
-            resolve(window.PushinPayReal);
+            resolve(window.SyncPayReal);
           } else if (tentativas >= 50) { // 5 segundos (50 * 100ms)
             clearInterval(intervalo);
-            reject(new Error('PushinPayReal não carregou a tempo'));
+            reject(new Error('SyncPayReal não carregou a tempo'));
           }
         }, 100);
       });
     };
 
     try {
-      const pushinPay = await aguardarPushinPay();
-      pushinPay.atualizarValorPlano(valor, plano);
-      await pushinPay.criarPix();
+      const syncPay = await aguardarSyncPay();
+      syncPay.atualizarValorPlano(valor, plano);
+      await syncPay.criarPix();
     } catch (error) {
       console.error('❌ Erro ao processar pagamento:', error);
       alert('Erro ao gerar pagamento. Por favor, recarregue a página e tente novamente.');
@@ -76,8 +76,8 @@ export default function Home() {
 
   const fecharModal = () => {
     setModalAberto(false);
-    if (typeof window !== 'undefined' && window.PushinPayReal) {
-      window.PushinPayReal.pararVerificacao();
+    if (typeof window !== 'undefined' && window.SyncPayReal) {
+      window.SyncPayReal.pararVerificacao();
     }
   };
 
@@ -530,13 +530,13 @@ export default function Home() {
         }}
       />
       <Script 
-        src="/js/pushinpay-real.js" 
+        src="/js/syncpay-real.js" 
         strategy="afterInteractive"
         onLoad={() => {
-          console.log('✅ PushinPayReal carregado e pronto');
+          console.log('✅ SyncPayReal carregado e pronto');
         }}
         onError={(e) => {
-          console.error('❌ Erro ao carregar pushinpay-real.js:', e);
+          console.error('❌ Erro ao carregar syncpay-real.js:', e);
         }}
       />
     </>

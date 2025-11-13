@@ -46,5 +46,6 @@
 
 # Variáveis de ambiente (valores padrão)
 [build.environment]
-  NEXT_PUBLIC_BASE_URL = "https://marmari.netlify.app"
+  NEXT_PUBLIC_BASE_URL = "https://marprivacy.site"
+  NEXT_PUBLIC_SITE_URL = "https://marprivacy.site"
 
