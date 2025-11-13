@@ -41,10 +41,21 @@ export default async function handler(req, res) {
     hasProductHash: !!process.env.IRONPAY_PRODUCT_HASH,
     isVercel: !!process.env.VERCEL,
     vercelEnv: process.env.VERCEL_ENV || 'unknown',
-    allIronPayVars: Object.keys(process.env).filter(k => k.includes('IRONPAY'))
+    allIronPayVars: Object.keys(process.env).filter(k => k.includes('IRONPAY')),
+    // Debug detalhado
+    apiTokenLength: process.env.IRONPAY_API_TOKEN ? process.env.IRONPAY_API_TOKEN.length : 0,
+    apiTokenPreview: process.env.IRONPAY_API_TOKEN ? process.env.IRONPAY_API_TOKEN.substring(0, 20) + '...' : 'NÃO CONFIGURADO'
   };
   
   console.log('🔍 Debug Handler - Variáveis de ambiente:', JSON.stringify(envVars, null, 2));
+  
+  // Se estiver na Vercel e não tiver token, avisar sobre redeploy
+  if (process.env.VERCEL && !process.env.IRONPAY_API_TOKEN) {
+    console.error('⚠️ ATENÇÃO: Variáveis de ambiente não encontradas na Vercel!');
+    console.error('💡 SOLUÇÃO: Faça um redeploy na Vercel após adicionar as variáveis');
+    console.error('   1. Acesse: https://vercel.com/dashboard');
+    console.error('   2. Vá em Deployments → Clique nos 3 pontos → Redeploy');
+  }
 
   const { action } = req.body;
 
