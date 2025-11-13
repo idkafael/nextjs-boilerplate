@@ -29,11 +29,17 @@ async function getBearerToken() {
   }
   
   if (!apiBaseUrl) {
-    throw new Error('SYNCPAY_API_URL deve estar configurado no .env.local. Confirme a URL base com suporte SyncPay.');
+    const envHint = process.env.VERCEL 
+      ? 'Configure SYNCPAY_API_URL nas Environment Variables da Vercel (Settings → Environment Variables)'
+      : 'Configure SYNCPAY_API_URL no arquivo .env.local';
+    throw new Error(`SYNCPAY_API_URL não está configurado. ${envHint}. URL base: https://api.syncpayments.com.br`);
   }
 
   if (!clientId || !clientSecret) {
-    throw new Error('SYNCPAY_CLIENT_ID e SYNCPAY_CLIENT_SECRET devem estar configurados');
+    const envHint = process.env.VERCEL 
+      ? 'Configure nas Environment Variables da Vercel (Settings → Environment Variables)'
+      : 'Configure no arquivo .env.local';
+    throw new Error(`SYNCPAY_CLIENT_ID e SYNCPAY_CLIENT_SECRET devem estar configurados. ${envHint}`);
   }
 
   // Verificar se o token em cache ainda é válido
