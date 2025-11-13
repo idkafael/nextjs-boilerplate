@@ -22,6 +22,11 @@ function escolherOfferHash(valorCentavos) {
 }
 
 export default async function handler(req, res) {
+  // 🚀 VERSÃO NOVA - IronPay Integration v2.0.0
+  console.log('%c🚀 VERSÃO NOVA - IronPay Integration v2.0.0', 'color: #ff6b35; font-weight: bold;');
+  console.log('📅 Migração completa realizada em: 2025-11-13');
+  console.log('🔗 API: https://api.ironpayapp.com.br/api/public/v1');
+  
   // Apenas permitir POST
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Método não permitido' });

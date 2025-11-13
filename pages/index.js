@@ -533,7 +533,9 @@ export default function Home() {
         src="/js/syncpay-real.js" 
         strategy="afterInteractive"
         onLoad={() => {
-          console.log('✅ SyncPayReal (IronPay) carregado e pronto');
+          console.log('%c✅ SyncPayReal (IronPay) carregado e pronto', 'color: #4ade80; font-weight: bold;');
+          console.log('%c🚀 Versão Nova - IronPay Integration v2.0.0', 'color: #ff6b35; font-weight: bold;');
+          console.log('📅 Migração completa realizada em: 2025-11-13');
         }}
         onError={(e) => {
           console.error('❌ Erro ao carregar syncpay-real.js (IronPay):', e);

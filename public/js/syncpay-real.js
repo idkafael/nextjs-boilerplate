@@ -1,4 +1,12 @@
 // IronPay Integration (mantendo nome SyncPayReal para compatibilidade)
+// 🚀 VERSÃO NOVA - Migração completa para IronPay
+// Versão: 2.0.0 - IronPay Integration
+// Data: 2025-11-13
+console.log('%c🚀 VERSÃO NOVA - IronPay Integration v2.0.0', 'color: #ff6b35; font-size: 16px; font-weight: bold;');
+console.log('%c✅ Sistema migrado para IronPay com sucesso!', 'color: #4ade80; font-size: 12px;');
+console.log('📅 Data da migração: 2025-11-13');
+console.log('🔗 API: https://api.ironpayapp.com.br/api/public/v1');
+
 const SyncPayReal = {
   config: {
     baseUrl: '/api', // Aponta para a API Route do Next.js
