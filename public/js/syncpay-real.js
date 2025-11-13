@@ -1,4 +1,4 @@
-// SyncPay Real Integration
+// IronPay Integration (mantendo nome SyncPayReal para compatibilidade)
 const SyncPayReal = {
   config: {
     baseUrl: '/api', // Aponta para a API Route do Next.js
@@ -21,27 +21,28 @@ const SyncPayReal = {
     console.log(`📊 Valor atualizado: R$ ${valor.toFixed(2)} - ${plano}`);
   },
 
-  async criarPix(splitRules = null) {
+  async criarPix(client = null, currency = 'BRL') {
     try {
       this.atualizarStatus('Gerando pagamento...');
-      console.log('🔍 Criando PIX via API Route SyncPay...', {
+      console.log('🔍 Criando transação via API Route IronPay...', {
         valor: this.estado.valorAtual,
+        moeda: currency,
         plano: this.config.planoAtual,
-        splitRules: splitRules
+        client: client
       });
 
       // Preparar payload
       const payload = {
         action: 'create-pix',
         valor: this.estado.valorAtual,
-        plano: this.config.planoAtual
+        plano: this.config.planoAtual,
+        currency: currency.toUpperCase() // BRL, USD, EUR
       };
 
-      // Adicionar split se fornecido
-      // Exemplo de uso: syncPay.criarPix([{user_id: 'uuid-afiliado', percentage: 10}])
-      if (splitRules && Array.isArray(splitRules) && splitRules.length > 0) {
-        payload.split_rules = splitRules;
-        console.log('💰 Split configurado:', splitRules);
+      // Adicionar dados do cliente se fornecido
+      if (client && typeof client === 'object') {
+        payload.client = client;
+        console.log('👤 Dados do cliente incluídos:', client);
       }
 
       const response = await fetch(`${this.config.baseUrl}/syncpay`, {
@@ -57,39 +58,152 @@ const SyncPayReal = {
 
       if (!response.ok) {
         const errorMsg = data.error || data.message || 'Erro desconhecido ao criar PIX';
-        console.error('❌ Erro na API SyncPay:', {
+        console.error('❌ Erro na API IronPay:', {
           status: response.status,
           error: errorMsg,
           details: data
         });
 
         this.atualizarStatus(`Erro: ${errorMsg}`);
-        throw new Error(`SyncPay API Error: ${errorMsg}`);
+        throw new Error(`IronPay API Error: ${errorMsg}`);
       }
 
-      console.log('✅ PIX criado com sucesso via SyncPay:', data);
+      console.log('✅ Transação criada com sucesso via IronPay:', data);
 
       // Exibir QR Code e código PIX
-      // Conforme documentação oficial: https://syncpay.apidog.io
-      // A resposta tem estrutura: { message, pix_code, identifier }
-      const pixCode = data.pix_code;
-      const identifier = data.identifier;
+      // IronPay retorna em diferentes estruturas:
+      // 1. { success: true, hash, pix_code, qr_code (base64), ... }
+      // 2. { success: true, data: { hash, pix_code, qr_code (base64), ... } }
+      // 3. { success: true, data: { pix: { pix_url, pix_qr_code (string do código PIX) }, ... } }
+      // IMPORTANTE: pix_qr_code é uma STRING do código PIX, não uma imagem base64!
+      const pixCode = data.pix_code || 
+                     data.data?.pix_code || 
+                     data.data?.pix?.pix_url ||
+                     data.data?.pix?.pix_qr_code; // pix_qr_code é o código PIX em formato string
+      const qrCodeBase64 = data.qr_code || 
+                          data.data?.qr_code; // QR Code em base64 (se disponível)
+      // pix_qr_code é o código PIX em formato string, não base64
+      const pixQrCodeString = data.data?.pix?.pix_qr_code; // String do código PIX para gerar QR Code
+      const identifier = data.hash || data.identifier || data.data?.hash;
+      const paymentStatus = data.data?.payment_status || data.status || data.data?.status;
 
-      // QR Code será gerado a partir do pix_code
-      // SyncPay retorna apenas o código PIX (string), não uma imagem
-      if (pixCode) {
-        this.gerarEExibirQRCode(pixCode);
-        this.exibirCodigoPix(pixCode);
+      console.log('🔍 Debug - Extraindo dados:', {
+        pixCode: pixCode ? 'Encontrado' : 'NÃO encontrado',
+        qrCodeBase64: qrCodeBase64 ? 'Encontrado' : 'NÃO encontrado',
+        identifier: identifier ? identifier : 'NÃO encontrado',
+        paymentStatus: paymentStatus || 'NÃO encontrado',
+        dataKeys: Object.keys(data),
+        dataComplete: data // Mostrar objeto completo para debug
+      });
+      
+      // Verificar se o pagamento foi recusado
+      if (paymentStatus === 'refused') {
+        console.error('❌ ATENÇÃO: Transação foi RECUSADA pela IronPay!');
+        console.error('❌ Status:', paymentStatus);
+        console.error('❌ Resposta completa:', JSON.stringify(data, null, 2));
+        console.error('❌ Isso pode indicar:');
+        console.error('   1. Conta IronPay não verificada ou com restrições');
+        console.error('   2. Produto/oferta inativo ou inválido');
+        console.error('   3. Dados do cliente inválidos (CPF, endereço, etc.)');
+        console.error('   4. Configuração da conta incompleta');
+        console.error('   5. Limite de transações atingido');
+        
+        const errorMessage = data.message || 
+                           data.error || 
+                           data.details?.message ||
+                           'Transação recusada pela IronPay. Verifique no painel se a conta está ativa.';
+        
+        this.atualizarStatus(`Erro: ${errorMessage}`, true);
+        throw new Error(errorMessage);
+      }
+      
+      // Determinar o código PIX final (pode vir de pix_qr_code ou pix_url)
+      let codigoPixFinal = pixCode;
+      
+      // Se pix_qr_code existe e é uma string (código PIX), usar ele
+      if (pixQrCodeString && typeof pixQrCodeString === 'string' && pixQrCodeString.startsWith('000201')) {
+        codigoPixFinal = pixQrCodeString;
+        console.log('✅ Código PIX encontrado em pix_qr_code:', codigoPixFinal.substring(0, 50) + '...');
+      } else if (pixCode) {
+        codigoPixFinal = pixCode;
+        console.log('✅ Código PIX encontrado:', codigoPixFinal.substring(0, 50) + '...');
       }
 
-      // Salvar identifier da transação (UUID conforme documentação oficial)
+      // Exibir QR Code
+      // Verificar se qrCodeBase64 é uma imagem base64 válida
+      const isBase64Image = qrCodeBase64 && (
+        qrCodeBase64.startsWith('data:image') || 
+        qrCodeBase64.startsWith('/9j/') || 
+        qrCodeBase64.startsWith('iVBOR')
+      );
+      
+      if (isBase64Image) {
+        // É uma imagem base64 válida
+        this.exibirQRCode(qrCodeBase64);
+        console.log('✅ QR Code exibido (base64 do IronPay)');
+      } else if (codigoPixFinal) {
+        // Gerar QR Code a partir do código PIX (string)
+        console.log('🔄 Gerando QR Code a partir do código PIX...');
+        this.gerarEExibirQRCode(codigoPixFinal);
+      } else {
+        console.warn('⚠️ QR Code e código PIX não encontrados na resposta');
+      }
+
+      // Exibir código PIX para copiar
+      if (codigoPixFinal) {
+        console.log('✅ Exibindo código PIX para copiar:', codigoPixFinal.substring(0, 50) + '...');
+        this.exibirCodigoPix(codigoPixFinal);
+      } else {
+        console.warn('⚠️ Código PIX não encontrado na resposta da API');
+        console.warn('⚠️ Estrutura completa recebida:', JSON.stringify(data, null, 2));
+        
+        // Se não tiver código PIX, tentar buscar via consulta após alguns segundos
+        if (identifier) {
+          console.log('🔄 Aguardando 3 segundos e tentando consultar transação para obter código PIX...');
+          setTimeout(async () => {
+            try {
+              const checkResponse = await fetch(`${this.config.baseUrl}/syncpay`, {
+                method: 'POST',
+                headers: {
+                  'Accept': 'application/json',
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                  action: 'check-payment',
+                  transactionId: identifier
+                })
+              });
+              
+              if (checkResponse.ok) {
+                const checkData = await checkResponse.json();
+                const checkPixCode = checkData.pix_code || checkData.data?.pix_code;
+                const checkQrCode = checkData.qr_code || checkData.data?.qr_code;
+                
+                if (checkPixCode) {
+                  console.log('✅ Código PIX obtido via consulta posterior:', checkPixCode.substring(0, 50) + '...');
+                  this.exibirCodigoPix(checkPixCode);
+                }
+                
+                if (checkQrCode) {
+                  console.log('✅ QR Code obtido via consulta posterior');
+                  this.exibirQRCode(checkQrCode);
+                }
+              }
+            } catch (err) {
+              console.error('❌ Erro ao consultar transação:', err);
+            }
+          }, 3000);
+        }
+      }
+
+      // Salvar hash/identifier da transação
       if (identifier) {
         this.estado.transactionId = identifier;
-        console.log('✅ Transaction Identifier salvo:', identifier);
+        console.log('✅ Transaction Hash salvo:', identifier);
         // Iniciar verificação automática após criar PIX
         this.iniciarVerificacao();
       } else {
-        console.warn('⚠️ Transaction Identifier não encontrado na resposta da API SyncPay:', data);
+        console.warn('⚠️ Transaction Hash não encontrado na resposta da API IronPay:', data);
       }
 
       this.atualizarStatus('QR Code gerado com sucesso!');
@@ -102,7 +216,7 @@ const SyncPayReal = {
     }
   },
 
-  // Gerar QR Code a partir do código PIX usando API online
+  // Gerar QR Code a partir do código PIX usando API online (fallback)
   gerarEExibirQRCode(pixCode) {
     if (!pixCode) {
       console.warn('⚠️ Código PIX não disponível para gerar QR Code');
@@ -199,13 +313,14 @@ const SyncPayReal = {
   },
 
   exibirQRCode(qrCodeBase64) {
-    // Método legado para compatibilidade (se receber base64)
+    // Método para exibir QR Code em base64 (IronPay retorna assim)
     const qrDiv = document.getElementById('qrCode');
     if (qrDiv && qrCodeBase64) {
       qrDiv.innerHTML = '';
 
       const img = document.createElement('img');
       let imageSrc = qrCodeBase64;
+      // Se não começar com data:, adicionar prefixo
       if (!qrCodeBase64.startsWith('data:')) {
         imageSrc = `data:image/png;base64,${qrCodeBase64}`;
       }
@@ -213,6 +328,7 @@ const SyncPayReal = {
       img.alt = 'QR Code PIX';
       img.className = 'mx-auto max-w-xs';
       img.style.maxWidth = '256px';
+      img.style.height = 'auto';
 
       qrDiv.appendChild(img);
       console.log('✅ QR Code exibido (base64)');
@@ -325,17 +441,24 @@ const SyncPayReal = {
 
         const data = await response.json();
 
-        // Estrutura da resposta: { data: { reference_id, status, amount, ... } }
+        // Estrutura da resposta IronPay: { success: true, data: { hash, status, amount, ... } }
+        // Ou pode vir diretamente: { hash, status, ... }
         const transactionData = data.data || data;
         
-        // Status conforme documentação oficial da SyncPay
-        // Status possíveis: "pending" | "completed" | "failed" | "refunded" | "med"
-        const status = transactionData.status?.toLowerCase() || 'unknown';
-        console.log('📊 Status do pagamento SyncPay:', status, '| Dados completos:', transactionData);
+        // Status conforme documentação oficial da IronPay
+        // Status possíveis: "pending" | "paid" | "canceled" | "refunded"
+        let status = transactionData.status?.toLowerCase();
+        
+        // Se status não vier, assumir "pending" em vez de "unknown"
+        if (!status || status === 'unknown') {
+          status = 'pending';
+        }
+        
+        console.log('📊 Status do pagamento IronPay:', status, '| Dados completos:', transactionData);
 
         // Verificar se o pagamento foi confirmado
-        // Status "completed" conforme documentação oficial
-        const isPagamentoConfirmado = status === 'completed';
+        // Status "paid" conforme documentação oficial IronPay
+        const isPagamentoConfirmado = status === 'paid';
 
         if (isPagamentoConfirmado) {
           console.log('✅✅✅ PAGAMENTO CONFIRMADO! Redirecionando para agradecimento...');
@@ -396,20 +519,16 @@ const SyncPayReal = {
         } else if (status === 'pending') {
           // Pagamento criado mas ainda não pago, continuar verificando
           console.log('⏳ Aguardando pagamento... Status: pending');
-        } else if (status === 'failed') {
-          // Pagamento falhou
-          console.log('❌ Pagamento falhou. Status:', status);
-          this.atualizarStatus('❌ Pagamento falhou. Gere um novo QR Code.', true);
+        } else if (status === 'canceled') {
+          // Pagamento cancelado
+          console.log('❌ Pagamento cancelado. Status:', status);
+          this.atualizarStatus('❌ Pagamento cancelado. Gere um novo QR Code.', true);
           this.pararVerificacao();
         } else if (status === 'refunded') {
           // Pagamento reembolsado
           console.log('↩️ Pagamento reembolsado. Status:', status);
           this.atualizarStatus('↩️ Pagamento foi reembolsado.', true);
           this.pararVerificacao();
-        } else if (status === 'med') {
-          // Pagamento em análise (MED - Manual Evaluation Data)
-          console.log('⚠️ Pagamento em análise (MED). Status:', status);
-          this.atualizarStatus('⚠️ Pagamento em análise. Aguarde...');
         } else {
           // Status desconhecido, continuar verificando por segurança
           console.log('⚠️ Status desconhecido:', status, '- Continuando verificação...');
@@ -433,8 +552,7 @@ const SyncPayReal = {
   }
 };
 
-// Expor globalmente
+// Expor globalmente (mantendo nome SyncPayReal para compatibilidade)
 if (typeof window !== 'undefined') {
   window.SyncPayReal = SyncPayReal;
 }
-

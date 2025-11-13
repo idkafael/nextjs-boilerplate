@@ -41,7 +41,7 @@ export default function Home() {
     setCurrentPlan(plano);
     setModalAberto(true);
 
-    // Aguardar até que o script SyncPayReal esteja disponível
+    // Aguardar até que o script SyncPayReal (IronPay) esteja disponível
     const aguardarSyncPay = () => {
       return new Promise((resolve, reject) => {
         if (typeof window !== 'undefined' && window.SyncPayReal) {
@@ -58,7 +58,7 @@ export default function Home() {
             resolve(window.SyncPayReal);
           } else if (tentativas >= 50) { // 5 segundos (50 * 100ms)
             clearInterval(intervalo);
-            reject(new Error('SyncPayReal não carregou a tempo'));
+            reject(new Error('SyncPayReal (IronPay) não carregou a tempo'));
           }
         }, 100);
       });
@@ -533,10 +533,10 @@ export default function Home() {
         src="/js/syncpay-real.js" 
         strategy="afterInteractive"
         onLoad={() => {
-          console.log('✅ SyncPayReal carregado e pronto');
+          console.log('✅ SyncPayReal (IronPay) carregado e pronto');
         }}
         onError={(e) => {
-          console.error('❌ Erro ao carregar syncpay-real.js:', e);
+          console.error('❌ Erro ao carregar syncpay-real.js (IronPay):', e);
         }}
       />
     </>

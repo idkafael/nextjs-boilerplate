@@ -1,10 +1,107 @@
+import { useEffect } from 'react';
+
 export default function ModalPagamento({ aberto, fechar, valor, plano }) {
+  // Bloquear scroll do body quando o modal estiver aberto
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
+    if (aberto) {
+      // Salvar o scroll atual
+      const scrollY = window.scrollY;
+      const body = document.body;
+      const html = document.documentElement;
+      
+      // Salvar estilos originais
+      const originalBodyOverflow = body.style.overflow;
+      const originalBodyPosition = body.style.position;
+      const originalBodyTop = body.style.top;
+      const originalBodyWidth = body.style.width;
+      const originalHtmlOverflow = html.style.overflow;
+      
+      // Bloquear scroll de forma mais segura
+      body.style.overflow = 'hidden';
+      body.style.position = 'fixed';
+      body.style.top = `-${scrollY}px`;
+      body.style.width = '100%';
+      html.style.overflow = 'hidden';
+      
+      // Salvar valores para restaurar depois
+      body.setAttribute('data-scroll-y', scrollY.toString());
+      body.setAttribute('data-original-overflow', originalBodyOverflow);
+      body.setAttribute('data-original-position', originalBodyPosition);
+      body.setAttribute('data-original-top', originalBodyTop);
+      body.setAttribute('data-original-width', originalBodyWidth);
+      html.setAttribute('data-original-overflow', originalHtmlOverflow);
+    } else {
+      // Restaurar scroll
+      const body = document.body;
+      const html = document.documentElement;
+      const scrollY = body.getAttribute('data-scroll-y');
+      
+      // Restaurar estilos originais
+      body.style.overflow = body.getAttribute('data-original-overflow') || '';
+      body.style.position = body.getAttribute('data-original-position') || '';
+      body.style.top = body.getAttribute('data-original-top') || '';
+      body.style.width = body.getAttribute('data-original-width') || '';
+      html.style.overflow = html.getAttribute('data-original-overflow') || '';
+      
+      // Remover atributos
+      body.removeAttribute('data-scroll-y');
+      body.removeAttribute('data-original-overflow');
+      body.removeAttribute('data-original-position');
+      body.removeAttribute('data-original-top');
+      body.removeAttribute('data-original-width');
+      html.removeAttribute('data-original-overflow');
+      
+      // Restaurar posição do scroll
+      if (scrollY) {
+        window.scrollTo(0, parseInt(scrollY));
+      }
+    }
+    
+    // Cleanup
+    return () => {
+      if (aberto) {
+        const body = document.body;
+        const html = document.documentElement;
+        const scrollY = body.getAttribute('data-scroll-y');
+        
+        body.style.overflow = body.getAttribute('data-original-overflow') || '';
+        body.style.position = body.getAttribute('data-original-position') || '';
+        body.style.top = body.getAttribute('data-original-top') || '';
+        body.style.width = body.getAttribute('data-original-width') || '';
+        html.style.overflow = html.getAttribute('data-original-overflow') || '';
+        
+        body.removeAttribute('data-scroll-y');
+        body.removeAttribute('data-original-overflow');
+        body.removeAttribute('data-original-position');
+        body.removeAttribute('data-original-top');
+        body.removeAttribute('data-original-width');
+        html.removeAttribute('data-original-overflow');
+        
+        if (scrollY) {
+          window.scrollTo(0, parseInt(scrollY));
+        }
+      }
+    };
+  }, [aberto]);
+
   if (!aberto) return null;
 
   return (
-    <div id="paymentModal" className="fixed inset-0 bg-black bg-opacity-50 z-[9999] overflow-y-auto">
-      <div className="flex items-center justify-center min-h-screen p-4 py-8">
-        <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+    <div 
+      id="paymentModal" 
+      className="fixed inset-0 bg-black bg-opacity-50 z-[9999] overflow-y-auto"
+      style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}
+      onClick={(e) => {
+        // Fechar modal ao clicar fora dele
+        if (e.target.id === 'paymentModal') {
+          fechar();
+        }
+      }}
+    >
+      <div className="flex items-center justify-center min-h-screen p-4 py-8" onClick={(e) => e.stopPropagation()}>
+        <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto relative z-[10000]">
           {/* Header */}
           <div className="bg-gradient-to-r from-orange-500 to-pink-500 text-white p-6 rounded-t-2xl">
             <div className="flex justify-between items-center">
