@@ -193,6 +193,20 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Método não permitido' });
   }
 
+  // Debug: Verificar variáveis de ambiente no início do handler
+  const envVars = {
+    hasApiUrl: !!process.env.SYNCPAY_API_URL,
+    apiUrl: process.env.SYNCPAY_API_URL || 'NÃO CONFIGURADO',
+    hasClientId: !!process.env.SYNCPAY_CLIENT_ID,
+    hasClientSecret: !!process.env.SYNCPAY_CLIENT_SECRET,
+    hasSplitRules: !!process.env.SYNCPAY_SPLIT_RULES,
+    isVercel: !!process.env.VERCEL,
+    vercelEnv: process.env.VERCEL_ENV || 'unknown',
+    allSyncPayVars: Object.keys(process.env).filter(k => k.includes('SYNCPAY'))
+  };
+  
+  console.log('🔍 Debug Handler - Variáveis de ambiente:', envVars);
+
   const { action } = req.body;
 
   try {
