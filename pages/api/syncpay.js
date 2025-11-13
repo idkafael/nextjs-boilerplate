@@ -69,9 +69,21 @@ export default async function handler(req, res) {
       const productHash = process.env.IRONPAY_PRODUCT_HASH;
 
       if (!apiToken) {
+        const isVercel = !!process.env.VERCEL;
+        const errorMessage = isVercel 
+          ? 'IRONPAY_API_TOKEN não configurado. As variáveis foram adicionadas DEPOIS do último deploy. Faça um REDEPLOY na Vercel para aplicar as novas variáveis.'
+          : 'Configure IRONPAY_API_TOKEN nas variáveis de ambiente';
+        
         return res.status(500).json({
           error: 'IRONPAY_API_TOKEN não configurado',
-          message: 'Configure IRONPAY_API_TOKEN nas variáveis de ambiente'
+          message: errorMessage,
+          solution: isVercel ? {
+            step1: 'Acesse: https://vercel.com/dashboard',
+            step2: 'Abra o projeto marprivacy.site',
+            step3: 'Vá em Deployments → Clique nos 3 pontos (⋯) do último deploy',
+            step4: 'Selecione "Redeploy"',
+            step5: 'Aguarde o build completar (~2-3 minutos)'
+          } : 'Adicione IRONPAY_API_TOKEN no arquivo .env.local e reinicie o servidor'
         });
       }
 
