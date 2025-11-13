@@ -8,7 +8,7 @@ Sistema completo de pagamento PIX integrado com SyncPay para conteúdo premium, 
 - **React 18** - Biblioteca UI
 - **Tailwind CSS** - Estilização
 - **SyncPay API** - Pagamentos PIX com Split Automático
-- **Netlify** - Hospedagem
+- **Vercel** - Hospedagem
 
 ## 📋 Instalação
 
@@ -65,29 +65,29 @@ npm run dev
 
 Acesse: http://localhost:3000
 
-## 🚀 Deploy na Netlify
-
-**📖 Siga o guia completo:** [NETLIFY-DEPLOY.md](NETLIFY-DEPLOY.md)
+## 🚀 Deploy na Vercel
 
 ### Deploy Rápido
 
 1. **Conecte ao GitHub:**
-   - Vá em [netlify.com](https://netlify.com)
-   - Clique em "Add new site" → "Import an existing project"
-   - Selecione o repositório **idkafael/marmari**
+   - Vá em [vercel.com](https://vercel.com)
+   - Clique em "Add New Project"
+   - Selecione o repositório **idkafael/nextjs-boilerplate**
 
 2. **Configure Environment Variables:**
-   - Vá em "Show advanced" → "Add environment variables"
+   - Vá em **Settings** → **Environment Variables**
    - Adicione todas as variáveis do `.env.local`
+   - Consulte `ATUALIZAR-ENV.md` para lista completa
 
 3. **Deploy:**
-   - Clique em "Deploy site"
-   - Aguarde o build (~3-4 minutos)
+   - A Vercel detecta Next.js automaticamente
+   - Clique em "Deploy"
+   - Aguarde o build (~2-3 minutos)
    - Teste o site funcionando
 
 ### URLs
-- **Repositório**: https://github.com/idkafael/marmari
-- **Site**: https://marprivacy.site
+- **Repositório**: https://github.com/idkafael/nextjs-boilerplate
+- **Site Produção**: https://marprivacy.site
 
 ## 🔐 Segurança
 
