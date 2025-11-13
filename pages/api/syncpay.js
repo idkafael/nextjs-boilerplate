@@ -205,7 +205,17 @@ export default async function handler(req, res) {
     allSyncPayVars: Object.keys(process.env).filter(k => k.includes('SYNCPAY'))
   };
   
-  console.log('🔍 Debug Handler - Variáveis de ambiente:', envVars);
+  console.log('🔍 Debug Handler - Variáveis de ambiente:', JSON.stringify(envVars, null, 2));
+  
+  // Se não tiver a variável, retornar erro detalhado
+  if (!process.env.SYNCPAY_API_URL) {
+    return res.status(500).json({
+      error: 'SYNCPAY_API_URL não está configurado',
+      message: 'Configure SYNCPAY_API_URL nas Environment Variables da Vercel (Settings → Environment Variables). Verifique se está marcado para Production.',
+      debug: envVars,
+      suggestion: 'Verifique os logs da Vercel para ver quais variáveis estão disponíveis'
+    });
+  }
 
   const { action } = req.body;
 
