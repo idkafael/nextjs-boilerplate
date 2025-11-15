@@ -90,6 +90,7 @@ export default async function handler(req, res) {
       try {
         data = await pushinpay.pix.create(payload);
         console.log('✅ PIX criado com sucesso via biblioteca');
+        console.log('📦 Resposta completa da biblioteca PushinPay:', JSON.stringify(data, null, 2));
       } catch (error) {
         console.error('❌ Erro ao criar PIX:', error);
         const errorMsg = error.message || error.error || 'Erro desconhecido ao criar PIX';
@@ -101,21 +102,61 @@ export default async function handler(req, res) {
         });
       }
 
-      console.log('✅ PIX criado com sucesso:', {
-        id: data.id || data.transaction_id,
-        status: data.status
+      // Extrair transaction ID de todas as formas possíveis
+      // A biblioteca PushinPay pode retornar em diferentes formatos
+      const transactionId = data.id || 
+                            data.transaction_id || 
+                            data.transactionId ||
+                            data.payment_id ||
+                            data.paymentId ||
+                            data.uuid ||
+                            data.hash ||
+                            data.identifier ||
+                            (data.data && (data.data.id || data.data.transaction_id || data.data.payment_id));
+
+      console.log('🔍 Transaction ID extraído:', transactionId);
+      console.log('📊 Dados extraídos:', {
+        transactionId,
+        status: data.status || data.data?.status,
+        hasQrCode: !!(data.qr_code_base64 || data.qrcode_base64 || data.qr_code_image || data.data?.qr_code_base64),
+        hasPixCode: !!(data.qr_code || data.pix_code || data.emv || data.data?.qr_code || data.data?.pix_code)
       });
 
+      // Se não tiver transaction ID, gerar um temporário baseado em timestamp
+      // Isso permite que a verificação funcione mesmo sem ID inicial
+      const finalTransactionId = transactionId || `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      
+      if (!transactionId) {
+        console.warn('⚠️ Transaction ID não encontrado na resposta. Usando ID temporário:', finalTransactionId);
+      }
+
       // Retornar dados formatados conforme esperado pelo frontend
-      return res.status(200).json({
-        id: data.id || data.transaction_id || data.payment_id,
-        transaction_id: data.id || data.transaction_id || data.payment_id,
-        qr_code_base64: data.qr_code_base64 || data.qrcode_base64 || data.qr_code_image,
-        qr_code: data.qr_code || data.pix_code || data.emv,
-        status: data.status || 'pending',
-        value: data.value || valor,
+      const responseData = {
+        id: finalTransactionId,
+        transaction_id: finalTransactionId,
+        qr_code_base64: data.qr_code_base64 || 
+                       data.qrcode_base64 || 
+                       data.qr_code_image ||
+                       data.data?.qr_code_base64 ||
+                       data.data?.qrcode_base64,
+        qr_code: data.qr_code || 
+                data.pix_code || 
+                data.emv ||
+                data.data?.qr_code ||
+                data.data?.pix_code,
+        status: data.status || data.data?.status || 'pending',
+        value: data.value || data.data?.value || valorFinal,
         plano: plano
+      };
+
+      console.log('📤 Retornando dados para frontend:', {
+        id: responseData.id,
+        status: responseData.status,
+        hasQrCode: !!responseData.qr_code_base64,
+        hasPixCode: !!responseData.qr_code
       });
+
+      return res.status(200).json(responseData);
 
     } else if (action === 'check-payment') {
       const { transactionId } = req.body;

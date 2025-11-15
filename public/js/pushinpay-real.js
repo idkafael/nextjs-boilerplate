@@ -81,6 +81,17 @@ const PushinPayReal = {
         this.iniciarVerificacao();
       } else {
         console.warn('⚠️ Transaction ID não encontrado na resposta da API:', data);
+        console.warn('⚠️ Resposta completa recebida:', JSON.stringify(data, null, 2));
+        
+        // Tentar usar um ID temporário baseado em timestamp para permitir verificação
+        // Isso pode ser útil se a API não retornar ID imediatamente
+        const tempId = `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        this.estado.transactionId = tempId;
+        console.warn('⚠️ Usando ID temporário para verificação:', tempId);
+        console.warn('💡 Nota: A verificação pode não funcionar corretamente sem o ID real da transação');
+        
+        // Ainda assim, tentar iniciar verificação (pode não funcionar sem ID real)
+        // this.iniciarVerificacao();
       }
       
       this.atualizarStatus('QR Code gerado com sucesso!');
