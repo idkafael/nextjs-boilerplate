@@ -41,11 +41,11 @@ export default function Home() {
     setCurrentPlan(plano);
     setModalAberto(true);
 
-    // Aguardar até que o script SyncPayReal (IronPay) esteja disponível
-    const aguardarSyncPay = () => {
+    // Aguardar até que o script PushinPayReal esteja disponível
+    const aguardarPushinPay = () => {
       return new Promise((resolve, reject) => {
-        if (typeof window !== 'undefined' && window.SyncPayReal) {
-          resolve(window.SyncPayReal);
+        if (typeof window !== 'undefined' && window.PushinPayReal) {
+          resolve(window.PushinPayReal);
           return;
         }
         
@@ -53,21 +53,21 @@ export default function Home() {
         let tentativas = 0;
         const intervalo = setInterval(() => {
           tentativas++;
-          if (typeof window !== 'undefined' && window.SyncPayReal) {
+          if (typeof window !== 'undefined' && window.PushinPayReal) {
             clearInterval(intervalo);
-            resolve(window.SyncPayReal);
+            resolve(window.PushinPayReal);
           } else if (tentativas >= 50) { // 5 segundos (50 * 100ms)
             clearInterval(intervalo);
-            reject(new Error('SyncPayReal (IronPay) não carregou a tempo'));
+            reject(new Error('PushinPayReal não carregou a tempo'));
           }
         }, 100);
       });
     };
 
     try {
-      const syncPay = await aguardarSyncPay();
-      syncPay.atualizarValorPlano(valor, plano);
-      await syncPay.criarPix();
+      const pushinPay = await aguardarPushinPay();
+      pushinPay.atualizarValorPlano(valor, plano);
+      await pushinPay.criarPix();
     } catch (error) {
       console.error('❌ Erro ao processar pagamento:', error);
       alert('Erro ao gerar pagamento. Por favor, recarregue a página e tente novamente.');
@@ -76,8 +76,8 @@ export default function Home() {
 
   const fecharModal = () => {
     setModalAberto(false);
-    if (typeof window !== 'undefined' && window.SyncPayReal) {
-      window.SyncPayReal.pararVerificacao();
+    if (typeof window !== 'undefined' && window.PushinPayReal) {
+      window.PushinPayReal.pararVerificacao();
     }
   };
 
@@ -279,9 +279,9 @@ export default function Home() {
           <div className="mt-3">
             <h6 className="text-lg font-bold text-gray-800 mb-2">Assinaturas</h6>
             
-            <button onClick={() => handlePayment(19.90, '1 Mês')} className="w-full subscription-gradient text-black py-4 px-6 rounded-2xl font-medium transition-all mb-2 flex justify-between items-center shadow-sm">
-              <span>1 Mês</span>
-              <span>R$ 19,90</span>
+            <button onClick={() => handlePayment(0.01, '1 Mês (Teste)')} className="w-full subscription-gradient text-black py-4 px-6 rounded-2xl font-medium transition-all mb-2 flex justify-between items-center shadow-sm">
+              <span>1 Mês (Teste)</span>
+              <span>R$ 0,01</span>
             </button>
           </div>
           
@@ -454,8 +454,8 @@ export default function Home() {
             </div>
 
             <div className="text-center">
-              <button onClick={() => handlePayment(19.90, '1 Mês')} className="w-full bg-gradient-to-r from-orange-500 to-pink-500 text-white py-3 px-6 rounded-lg font-semibold hover:from-orange-600 hover:to-pink-600 transition-all">
-                🔒 Desbloquear todas as mídias
+              <button onClick={() => handlePayment(0.01, '1 Mês (Teste)')} className="w-full bg-gradient-to-r from-orange-500 to-pink-500 text-white py-3 px-6 rounded-lg font-semibold hover:from-orange-600 hover:to-pink-600 transition-all">
+                🔒 Desbloquear todas as mídias (Teste R$ 0,01)
               </button>
             </div>
           </div>
@@ -518,15 +518,14 @@ export default function Home() {
         }}
       />
       <Script 
-        src="/js/syncpay-real.js" 
+        src="/js/pushinpay-real.js" 
         strategy="afterInteractive"
         onLoad={() => {
-          console.log('%c✅ SyncPayReal (IronPay) carregado e pronto', 'color: #4ade80; font-weight: bold;');
-          console.log('%c🚀 Versão Nova - IronPay Integration v2.0.0', 'color: #ff6b35; font-weight: bold;');
-          console.log('📅 Migração completa realizada em: 2025-11-13');
+          console.log('%c✅ PushinPayReal carregado e pronto', 'color: #4ade80; font-weight: bold;');
+          console.log('%c🚀 PushinPay Integration', 'color: #ff6b35; font-weight: bold;');
         }}
         onError={(e) => {
-          console.error('❌ Erro ao carregar syncpay-real.js (IronPay):', e);
+          console.error('❌ Erro ao carregar pushinpay-real.js:', e);
         }}
       />
     </>
