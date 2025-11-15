@@ -47,13 +47,17 @@ export default async function handler(req, res) {
     if (action === 'create-pix') {
       const { valor, plano } = req.body;
 
-      // Validar valor (mínimo 1 centavo para testes)
-      if (!valor || valor < 1) {
-        return res.status(400).json({ error: 'Valor inválido. O valor mínimo é R$ 0,01 (1 centavo)' });
+      // Validar valor (mínimo 100 centavos = R$ 1,00 para evitar problemas com valores muito baixos)
+      if (!valor || valor < 100) {
+        return res.status(400).json({ 
+          error: 'Valor inválido. O valor mínimo é R$ 1,00 (100 centavos)',
+          valorRecebido: valor,
+          valorMinimo: 100
+        });
       }
       
-      // Garantir que o valor seja pelo menos 1 centavo
-      const valorFinal = Math.max(valor, 1); // Mínimo 1 centavo
+      // Garantir que o valor seja pelo menos R$ 1,00
+      const valorFinal = Math.max(valor, 100); // Mínimo 100 centavos (R$ 1,00)
 
       // Construir URL do webhook (opcional)
       const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_BASE_URL || 'https://marprivacy.site';
@@ -68,6 +72,7 @@ export default async function handler(req, res) {
       });
 
       // Preparar payload conforme documentação PushinPay
+      // A biblioteca pode precisar de campos específicos
       const payload = {
         value: valorFinal, // Valor em centavos (mínimo 1)
         webhook_url: webhookUrl,
@@ -76,6 +81,8 @@ export default async function handler(req, res) {
           split_rules: JSON.parse(process.env.PUSHINPAY_SPLIT_RULES)
         })
       };
+      
+      console.log('📤 Payload enviado para PushinPay:', JSON.stringify(payload, null, 2));
       
       console.log('💰 Valor do pagamento:', {
         valorOriginal: valor,
@@ -130,20 +137,83 @@ export default async function handler(req, res) {
         console.warn('⚠️ Transaction ID não encontrado na resposta. Usando ID temporário:', finalTransactionId);
       }
 
+      // Verificar se temos QR Code ou código PIX na resposta
+      // A biblioteca PushinPay pode retornar em diferentes formatos
+      const qrCodeBase64 = data.qr_code_base64 || 
+                          data.qrcode_base64 || 
+                          data.qr_code_image ||
+                          data.qr_code_image_base64 ||
+                          data.data?.qr_code_base64 ||
+                          data.data?.qrcode_base64 ||
+                          data.data?.qr_code_image;
+      
+      const pixCode = data.qr_code || 
+                     data.pix_code || 
+                     data.emv ||
+                     data.pix_qr_code ||
+                     data.qrcode ||
+                     data.data?.qr_code ||
+                     data.data?.pix_code ||
+                     data.data?.emv ||
+                     data.data?.pix_qr_code;
+
+      console.log('🔍 Verificação de QR Code e PIX Code:', {
+        hasQrCodeBase64: !!qrCodeBase64,
+        hasPixCode: !!pixCode,
+        qrCodeBase64Length: qrCodeBase64 ? qrCodeBase64.length : 0,
+        pixCodeLength: pixCode ? pixCode.length : 0,
+        allDataKeys: Object.keys(data),
+        dataStructure: data.data ? Object.keys(data.data) : 'no data property'
+      });
+
+      // Se não tiver QR Code nem código PIX, tentar consultar o pagamento novamente
+      // A biblioteca pode precisar de uma consulta adicional para obter o QR Code
+      let finalQrCodeBase64 = qrCodeBase64;
+      let finalPixCode = pixCode;
+      
+      if (!qrCodeBase64 && !pixCode && finalTransactionId && !finalTransactionId.startsWith('temp_')) {
+        console.log('🔄 QR Code não encontrado na criação. Tentando consultar pagamento...');
+        try {
+          const paymentData = await pushinpay.pix.status({
+            id: finalTransactionId
+          });
+          console.log('📦 Dados do pagamento consultado:', JSON.stringify(paymentData, null, 2));
+          
+          finalQrCodeBase64 = paymentData.qr_code_base64 || 
+                              paymentData.qrcode_base64 || 
+                              paymentData.qr_code_image ||
+                              paymentData.data?.qr_code_base64;
+          
+          finalPixCode = paymentData.qr_code || 
+                        paymentData.pix_code || 
+                        paymentData.emv ||
+                        paymentData.data?.qr_code ||
+                        paymentData.data?.pix_code;
+          
+          if (finalQrCodeBase64 || finalPixCode) {
+            console.log('✅ QR Code obtido na consulta!');
+          }
+        } catch (statusError) {
+          console.warn('⚠️ Erro ao consultar status do pagamento:', statusError.message);
+        }
+      }
+      
+      if (!finalQrCodeBase64 && !finalPixCode) {
+        console.warn('⚠️ ATENÇÃO: QR Code e código PIX não encontrados!');
+        console.warn('⚠️ Possíveis causas:');
+        console.warn('   1. Token PushinPay inválido ou não configurado');
+        console.warn('   2. A biblioteca PushinPay não está retornando os dados corretamente');
+        console.warn('   3. O formato da resposta é diferente do esperado');
+        console.warn('   4. A API PushinPay pode estar com problemas');
+        console.warn('💡 Verifique os logs acima para ver a resposta completa da biblioteca');
+      }
+
       // Retornar dados formatados conforme esperado pelo frontend
       const responseData = {
         id: finalTransactionId,
         transaction_id: finalTransactionId,
-        qr_code_base64: data.qr_code_base64 || 
-                       data.qrcode_base64 || 
-                       data.qr_code_image ||
-                       data.data?.qr_code_base64 ||
-                       data.data?.qrcode_base64,
-        qr_code: data.qr_code || 
-                data.pix_code || 
-                data.emv ||
-                data.data?.qr_code ||
-                data.data?.pix_code,
+        qr_code_base64: finalQrCodeBase64,
+        qr_code: finalPixCode,
         status: data.status || data.data?.status || 'pending',
         value: data.value || data.data?.value || valorFinal,
         plano: plano
@@ -153,7 +223,8 @@ export default async function handler(req, res) {
         id: responseData.id,
         status: responseData.status,
         hasQrCode: !!responseData.qr_code_base64,
-        hasPixCode: !!responseData.qr_code
+        hasPixCode: !!responseData.qr_code,
+        value: responseData.value
       });
 
       return res.status(200).json(responseData);
@@ -168,15 +239,54 @@ export default async function handler(req, res) {
       console.log('🔍 Verificando status do pagamento...', transactionId);
 
       // Verificar status do pagamento usando a biblioteca PushinPay
+      // Documentação: https://pushinpay.com.br
+      // Status esperado: 'paid' quando confirmado
       let data;
       try {
+        console.log('🔄 Consultando status na PushinPay para ID:', transactionId);
+        
+        // Se for um ID temporário, não tentar consultar na API
+        if (transactionId.startsWith('temp_')) {
+          console.warn('⚠️ ID temporário detectado. Não é possível verificar na API PushinPay.');
+          return res.status(200).json({
+            id: transactionId,
+            status: 'pending',
+            payment_status: 'pending',
+            paid: false,
+            confirmed: false,
+            message: 'ID temporário - aguardando ID real da transação'
+          });
+        }
+        
         data = await pushinpay.pix.status({
           id: transactionId
         });
+        
         console.log('✅ Status verificado com sucesso');
+        console.log('📦 Resposta completa do status:', JSON.stringify(data, null, 2));
       } catch (error) {
         console.error('❌ Erro ao verificar pagamento:', error);
+        console.error('❌ Detalhes do erro:', {
+          message: error.message,
+          error: error.error,
+          response: error.response,
+          status: error.status
+        });
+        
         const errorMsg = error.message || error.error || 'Erro desconhecido ao verificar pagamento';
+        
+        // Se for erro 404, a transação pode não existir ainda
+        if (error.status === 404 || error.response?.status === 404) {
+          console.warn('⚠️ Transação não encontrada (404). Pode ainda não ter sido criada na PushinPay.');
+          return res.status(200).json({
+            id: transactionId,
+            status: 'pending',
+            payment_status: 'pending',
+            paid: false,
+            confirmed: false,
+            message: 'Transação não encontrada - ainda pode estar sendo processada'
+          });
+        }
         
         return res.status(error.status || 500).json({
           error: errorMsg,
@@ -184,18 +294,46 @@ export default async function handler(req, res) {
         });
       }
 
-      console.log('📊 Status do pagamento:', data.status);
+      // Extrair status de diferentes formatos possíveis
+      const status = data.status?.toLowerCase() || 
+                     data.data?.status?.toLowerCase() ||
+                     data.payment_status?.toLowerCase() ||
+                     'pending';
+      
+      console.log('📊 Status extraído do pagamento:', status);
+      console.log('📊 Dados completos do status:', {
+        status,
+        id: data.id || data.data?.id,
+        paid: data.paid || data.data?.paid,
+        value: data.value || data.data?.value,
+        paidAt: data.paid_at || data.data?.paid_at,
+        createdAt: data.created_at || data.data?.created_at
+      });
+
+      // Verificar se está pago (PushinPay usa 'paid' como status confirmado)
+      const isPaid = status === 'paid' || 
+                     data.paid === true || 
+                     data.data?.paid === true ||
+                     status === 'completed' ||
+                     status === 'approved';
 
       // Retornar dados formatados
       return res.status(200).json({
-        id: data.id || transactionId,
-        status: data.status || 'pending',
-        payment_status: data.status || 'pending',
-        paid: data.status === 'paid' || data.status === 'completed' || data.status === 'approved',
-        confirmed: data.status === 'paid' || data.status === 'completed' || data.status === 'approved',
-        value: data.value,
-        created_at: data.created_at,
-        paid_at: data.paid_at
+        id: data.id || data.data?.id || transactionId,
+        status: status,
+        payment_status: status,
+        paid: isPaid,
+        confirmed: isPaid,
+        value: data.value || data.data?.value,
+        created_at: data.created_at || data.data?.created_at,
+        paid_at: data.paid_at || data.data?.paid_at,
+        // Incluir dados completos para debug
+        _debug: {
+          originalStatus: data.status || data.data?.status,
+          extractedStatus: status,
+          isPaid: isPaid,
+          originalResponse: data
+        }
       });
 
     } else {

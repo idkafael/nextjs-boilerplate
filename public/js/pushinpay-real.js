@@ -185,15 +185,30 @@ const PushinPayReal = {
         }
         
         const data = await response.json();
-        const status = data.status?.toLowerCase() || data.payment_status?.toLowerCase() || 'unknown';
+        
+        // Extrair status de diferentes formatos
+        const status = (data.status?.toLowerCase() || 
+                       data.payment_status?.toLowerCase() || 
+                       'unknown').trim();
+        
         console.log('📊 Status do pagamento:', status, '| Dados completos:', data);
         
         // Verificar se o pagamento foi confirmado
+        // PushinPay usa 'paid' como status confirmado
         // Status possíveis: paid, approved, confirmed, completed, success
         const statusConfirmado = ['paid', 'approved', 'confirmed', 'completed', 'success'];
         const isPagamentoConfirmado = statusConfirmado.includes(status) || 
                                        data.paid === true || 
-                                       data.confirmed === true;
+                                       data.confirmed === true ||
+                                       (data._debug && data._debug.isPaid === true);
+        
+        console.log('🔍 Verificação de confirmação:', {
+          status,
+          paid: data.paid,
+          confirmed: data.confirmed,
+          isPagamentoConfirmado,
+          statusConfirmado: statusConfirmado.includes(status)
+        });
         
         if (isPagamentoConfirmado) {
           console.log('✅✅✅ PAGAMENTO CONFIRMADO! Redirecionando para agradecimento...');
