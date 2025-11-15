@@ -47,7 +47,7 @@ export default async function handler(req, res) {
     if (action === 'create-pix') {
       const { valor, plano } = req.body;
 
-      // Validar valor (mínimo 100 centavos = R$ 1,00 para evitar problemas com valores muito baixos)
+      // Validar valor (mínimo 100 centavos = R$ 1,00)
       if (!valor || valor < 100) {
         return res.status(400).json({ 
           error: 'Valor inválido. O valor mínimo é R$ 1,00 (100 centavos)',
@@ -56,8 +56,8 @@ export default async function handler(req, res) {
         });
       }
       
-      // Garantir que o valor seja pelo menos R$ 1,00
-      const valorFinal = Math.max(valor, 100); // Mínimo 100 centavos (R$ 1,00)
+      // Usar o valor recebido (já validado)
+      const valorFinal = valor;
 
       // Construir URL do webhook (opcional)
       const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_BASE_URL || 'https://marprivacy.site';
