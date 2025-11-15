@@ -94,7 +94,7 @@ export default function Home() {
         <meta property="og:type" content="website" />
         <meta property="og:title" content="Privacy | Marcelly Mar" />
         <meta property="og:description" content="Conteúdo exclusivo da Marcelly Mar. Acesse fotos e vídeos premium." />
-        <meta property="og:image" content="/images/banner.jpg" />
+        <meta property="og:image" content="https://i.imgur.com/0PL9pC9.jpg" />
         
         {/* Twitter */}
         <meta name="twitter:card" content="summary_large_image" />
@@ -179,18 +179,12 @@ export default function Home() {
 
       {/* Main Card */}
       <div className="relative max-w-3xl mx-auto rounded-3xl overflow-hidden bg-white shadow-lg mt-4">
-        {/* Banner Image - com cache busting para garantir atualização */}
+        {/* Banner Image */}
         <img 
           className="w-full h-64 object-cover" 
-          src={mounted && imageVersion ? `/images/banner.jpg?v=${imageVersion}` : '/images/banner.jpg'} 
+          src="https://i.imgur.com/0PL9pC9.jpg" 
           alt="Banner"
           loading="eager"
-          onError={(e) => {
-            // Se banner.jpg não existir, tenta sem cache busting
-            if (e.target.src.includes('?v=')) {
-              e.target.src = '/images/banner.jpg';
-            }
-          }}
         />
         
         {/* Statistics - Top Right */}
@@ -221,19 +215,13 @@ export default function Home() {
         
         {/* Content Area */}
         <div className="bg-white p-6 -mt-12 relative z-10">
-          {/* Profile Picture - com cache busting para garantir atualização */}
+          {/* Profile Picture */}
           <div className="flex justify-start -mt-16 mb-4">
             <img 
               className="h-24 w-24 rounded-full border-4 border-white object-cover" 
-              src={mounted && imageVersion ? `/images/perfil.jpg?v=${imageVersion}` : '/images/perfil.jpg'} 
+              src="https://i.imgur.com/thqfz8a.jpg" 
               alt="Perfil"
               loading="eager"
-              onError={(e) => {
-                // Se perfil.jpg não existir, tenta sem cache busting
-                if (e.target.src.includes('?v=')) {
-                  e.target.src = '/images/perfil.jpg';
-                }
-              }}
             />
           </div>
           
@@ -365,7 +353,7 @@ export default function Home() {
           <div className="content-transition">
             {/* Profile Section */}
             <div className="flex items-center mb-6">
-              <img className="h-12 w-12 rounded-full object-cover mr-4" src="/images/perfil.jpg" alt="Profile" />
+              <img className="h-12 w-12 rounded-full object-cover mr-4" src="https://i.imgur.com/thqfz8a.jpg" alt="Profile" />
               <div className="flex-1">
                 <div className="flex items-center">
                   <h3 className="text-lg font-bold text-gray-900">Marcelly Mar 😘</h3>
@@ -409,7 +397,7 @@ export default function Home() {
                 }}
                 className="w-full h-full object-cover" 
                 style={{ filter: 'blur(8px)' }} 
-                src="https://i.imgur.com/I0eKs4Q.mp4"
+                src="https://i.imgur.com/QEH5y1P.mp4"
                 muted
                 loop
                 playsInline

@@ -7,15 +7,15 @@ export default function LateralVideos() {
   const [currentPlayingIndex, setCurrentPlayingIndex] = useState(null);
   
   const videos = [
-    { src: 'https://i.imgur.com/Ayv8mnq.mp4', poster: 'https://i.imgur.com/Ayv8mnq.jpg', index: 0 },
-    { src: 'https://i.imgur.com/up1YgVy.mp4', poster: 'https://i.imgur.com/up1YgVy.jpg', index: 1 },
-    { src: 'https://i.imgur.com/3dSAQwq.mp4', poster: 'https://i.imgur.com/3dSAQwq.jpg', index: 2 },
-    { src: 'https://i.imgur.com/6vnmZfH.mp4', poster: 'https://i.imgur.com/6vnmZfH.jpg', index: 3 },
-    { src: 'https://i.imgur.com/b88MckN.mp4', poster: 'https://i.imgur.com/b88MckN.jpg', index: 4 },
-    { src: 'https://i.imgur.com/inbI2LH.mp4', poster: 'https://i.imgur.com/inbI2LH.jpg', index: 5 },
-    { src: 'https://i.imgur.com/mR3b7Z2.mp4', poster: 'https://i.imgur.com/mR3b7Z2.jpg', index: 6 },
-    { src: 'https://i.imgur.com/XUdLnhO.mp4', poster: 'https://i.imgur.com/XUdLnhO.jpg', index: 7 },
-    { src: 'https://i.imgur.com/URFdcgj.mp4', poster: 'https://i.imgur.com/URFdcgj.jpg', index: 8 }
+    { src: 'https://i.imgur.com/wshJeDg.mp4', poster: 'https://i.imgur.com/wshJeDg.jpg', index: 0 },
+    { src: 'https://i.imgur.com/KCVszJS.mp4', poster: 'https://i.imgur.com/KCVszJS.jpg', index: 1 },
+    { src: 'https://i.imgur.com/RyF0NAN.mp4', poster: 'https://i.imgur.com/RyF0NAN.jpg', index: 2 },
+    { src: 'https://i.imgur.com/CSkcKCQ.mp4', poster: 'https://i.imgur.com/CSkcKCQ.jpg', index: 3 },
+    { src: 'https://i.imgur.com/OLkDXnu.mp4', poster: 'https://i.imgur.com/OLkDXnu.jpg', index: 4 },
+    { src: 'https://i.imgur.com/8mBYwoN.mp4', poster: 'https://i.imgur.com/8mBYwoN.jpg', index: 5 },
+    { src: 'https://i.imgur.com/AIMDhgB.mp4', poster: 'https://i.imgur.com/AIMDhgB.jpg', index: 6 },
+    { src: 'https://i.imgur.com/BfAlT0M.mp4', poster: 'https://i.imgur.com/BfAlT0M.jpg', index: 7 },
+    { src: 'https://i.imgur.com/pFcCYlT.mp4', poster: 'https://i.imgur.com/pFcCYlT.jpg', index: 8 }
   ];
 
   const handleMouseEnter = (index) => {
