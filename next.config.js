@@ -6,7 +6,14 @@ const nextConfig = {
   
   // Permitir servir arquivos estáticos da pasta public
   images: {
-    domains: [],
+    domains: ['i.imgur.com'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'i.imgur.com',
+        pathname: '/**',
+      },
+    ],
   },
   
   // Configurações de desenvolvimento para hot reload
