@@ -94,7 +94,7 @@ export default function Home() {
         <meta property="og:type" content="website" />
         <meta property="og:title" content="Privacy | Marcelly Mar" />
         <meta property="og:description" content="Conteúdo exclusivo da Marcelly Mar. Acesse fotos e vídeos premium." />
-        <meta property="og:image" content="https://i.imgur.com/0PL9pC9.jpg" />
+        <meta property="og:image" content="https://i.imgur.com/ce3TQym.jpg" />
         
         {/* Twitter */}
         <meta name="twitter:card" content="summary_large_image" />
@@ -182,7 +182,7 @@ export default function Home() {
         {/* Banner Image */}
         <img 
           className="w-full h-64 object-cover" 
-          src="https://i.imgur.com/0PL9pC9.jpg" 
+          src="https://i.imgur.com/ce3TQym.jpg" 
           alt="Banner"
           loading="eager"
         />
@@ -219,7 +219,7 @@ export default function Home() {
           <div className="flex justify-start -mt-16 mb-4">
             <img 
               className="h-24 w-24 rounded-full border-4 border-white object-cover" 
-              src="https://i.imgur.com/thqfz8a.jpg" 
+              src="https://i.imgur.com/H12uGdK.jpg" 
               alt="Perfil"
               loading="eager"
             />
@@ -237,20 +237,20 @@ export default function Home() {
           {/* Description */}
           <div className="text-gray-800 text-sm -mt-2">
             <p className="mb-0">
-              Oi, papai 😘 Sou a Mar, bem-vindo ao meu paraiso!
+              Oi, papai 🎀 Sou a Mar, bem-vindo ao meu cantinho secreto!❤️
             </p>
             <p className="mb-0">
-              Sou uma garotinha de 19 anos ❤️
+              Sou uma garotinha de 18 anos 🍭
             </p>
             <p className="mb-0">
               Estou procurando alguém com quem eu possa ter intimidade e compartilhar bons momentos 🥰
             </p>
             <div>
-              <p className="font-semibold mb-1">🔥 Publicações diárias</p>
-              <p className="font-semibold mb-1">🔥 Vídeos explícitos completos</p>
-              <p className="font-semibold mb-1">🔥 Pedidos adultos +18</p>
-              <p className="font-semibold mb-1">🔥 Sexting picante</p>
-              <p className="font-semibold">🔥 Plug anal, lingeries e vibradores</p>
+              <p className="font-semibold mb-1">💤 Publicações diárias</p>
+              <p className="font-semibold mb-1">🧴 Vídeos explícitos completos</p>
+              <p className="font-semibold mb-1">🍭 Pedidos adultos +18</p>
+              <p className="font-semibold mb-1">🧸 Sexting picante</p>
+              <p className="font-semibold">🍒 Plug anal, lingeries e vibradores</p>
             </div>
           </div>
           
@@ -353,7 +353,7 @@ export default function Home() {
           <div className="content-transition">
             {/* Profile Section */}
             <div className="flex items-center mb-6">
-              <img className="h-12 w-12 rounded-full object-cover mr-4" src="https://i.imgur.com/thqfz8a.jpg" alt="Profile" />
+              <img className="h-12 w-12 rounded-full object-cover mr-4" src="https://i.imgur.com/H12uGdK.jpg" alt="Profile" />
               <div className="flex-1">
                 <div className="flex items-center">
                   <h3 className="text-lg font-bold text-gray-900">Marcelly Mar 😘</h3>

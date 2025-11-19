@@ -22,9 +22,8 @@ console.log('✅ Arquivo .env.local encontrado');
 const envContent = fs.readFileSync(envPath, 'utf-8');
 
 const requiredVars = [
-  'IRONPAY_API_TOKEN',
-  'IRONPAY_PRODUCT_HASH',
-  'IRONPAY_OFFER_HASH'
+  'PUSHINPAY_TOKEN',
+  'PUSHINPAY_API_URL'
 ];
 
 console.log('\n📋 Verificando variáveis obrigatórias:\n');

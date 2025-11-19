@@ -1,45 +1,12 @@
 // API Route para PushinPay - Protegida no servidor
-// Token protegido no servidor, não exposto no cliente
-
-import { Pushinpay } from 'pushinpay';
+// Só o servidor tem acesso às variáveis de ambiente
+// Documentação: https://app.theneo.io/pushinpay/pix
 
 export default async function handler(req, res) {
-  // 🚀 PushinPay Integration
-  console.log('%c🚀 PushinPay Integration', 'color: #ff6b35; font-weight: bold;');
-  
   // Apenas permitir POST
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Método não permitido' });
   }
-
-  // Verificar variáveis de ambiente
-  const apiToken = process.env.PUSHINPAY_TOKEN;
-  const isSandbox = process.env.PUSHINPAY_SANDBOX === 'true';
-  
-  if (!apiToken) {
-    const isVercel = !!process.env.VERCEL;
-    const errorMessage = isVercel 
-      ? 'PUSHINPAY_TOKEN não configurado. Verifique: 1) Variáveis configuradas em Settings → Environment Variables, 2) Variáveis marcadas para Production, 3) Redeploy feito após adicionar variáveis.'
-      : 'Configure PUSHINPAY_TOKEN nas variáveis de ambiente';
-    
-    console.error('❌ ERRO: PUSHINPAY_TOKEN não encontrado!');
-    console.error('🔍 Debug:', {
-      isVercel: isVercel,
-      vercelEnv: process.env.VERCEL_ENV,
-      allPushinPayKeys: Object.keys(process.env).filter(k => k.includes('PUSHINPAY')),
-    });
-    
-    return res.status(500).json({ 
-      error: errorMessage,
-      details: 'PUSHINPAY_TOKEN não configurado nas variáveis de ambiente'
-    });
-  }
-
-  // Inicializar cliente PushinPay
-  const pushinpay = new Pushinpay({ 
-    token: apiToken, 
-    sandbox: isSandbox 
-  });
 
   const { action } = req.body;
 
@@ -47,305 +14,252 @@ export default async function handler(req, res) {
     if (action === 'create-pix') {
       const { valor, plano } = req.body;
 
-      // Validar valor (mínimo 100 centavos = R$ 1,00)
-      if (!valor || valor < 100) {
-        return res.status(400).json({ 
-          error: 'Valor inválido. O valor mínimo é R$ 1,00 (100 centavos)',
-          valorRecebido: valor,
-          valorMinimo: 100
+      // Validar variáveis de ambiente obrigatórias
+      const apiToken = process.env.PUSHINPAY_TOKEN;
+
+      if (!apiToken) {
+        return res.status(500).json({
+          error: 'PUSHINPAY_TOKEN não configurado',
+          message: 'Configure PUSHINPAY_TOKEN nas variáveis de ambiente'
         });
       }
-      
-      // Usar o valor recebido (já validado)
-      const valorFinal = valor;
 
-      // Construir URL do webhook (opcional)
-      const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_BASE_URL || 'https://marprivacy.site';
-      const webhookUrl = `${baseUrl}/api/webhook-pushinpay`;
+      // Validar valor - PushinPay espera valor em centavos (INT)
+      const valorFinalCentavos = Math.round(valor * 100); // Converter para centavos
 
-      console.log('🔍 Criando PIX via PushinPay API...', {
-        valor,
-        plano,
-        webhookUrl,
-        hasToken: !!apiToken,
-        sandbox: isSandbox
+      if (!valorFinalCentavos || valorFinalCentavos < 50) {
+        return res.status(400).json({
+          error: 'Valor inválido. O valor mínimo é R$ 0,50 (50 centavos)',
+          message: 'Valor inválido. O valor mínimo é R$ 0,50 (50 centavos)'
+        });
+      }
+
+      // Configurar URL do webhook
+      const webhookUrl = process.env.NEXT_PUBLIC_SITE_URL
+        ? `${process.env.NEXT_PUBLIC_SITE_URL}/api/webhook-pushinpay`
+        : undefined;
+
+      console.log('Criando transação via PushinPay:', {
+        valorCentavos: valorFinalCentavos,
+        plano
       });
 
-      // Preparar payload conforme documentação PushinPay
-      // A biblioteca pode precisar de campos específicos
-      const payload = {
-        value: valorFinal, // Valor em centavos (mínimo 1)
-        webhook_url: webhookUrl,
-        // Split rules opcional (se configurado)
-        ...(process.env.PUSHINPAY_SPLIT_RULES && {
-          split_rules: JSON.parse(process.env.PUSHINPAY_SPLIT_RULES)
-        })
-      };
-      
-      console.log('📤 Payload enviado para PushinPay:', JSON.stringify(payload, null, 2));
-      
-      console.log('💰 Valor do pagamento:', {
-        valorOriginal: valor,
-        valorFinal: valorFinal,
-        valorEmReais: (valorFinal / 100).toFixed(2)
-      });
-
-      // Criar PIX usando a biblioteca PushinPay
-      console.log('🔄 Criando PIX usando biblioteca PushinPay...');
-      
-      let data;
       try {
-        data = await pushinpay.pix.create(payload);
-        console.log('✅ PIX criado com sucesso via biblioteca');
-        console.log('📦 Resposta completa da biblioteca PushinPay:', JSON.stringify(data, null, 2));
-      } catch (error) {
-        console.error('❌ Erro ao criar PIX:', error);
-        const errorMsg = error.message || error.error || 'Erro desconhecido ao criar PIX';
+        // Base URL da API PushinPay conforme documentação
+        const apiBaseUrl = 'https://api.pushinpay.com.br/api';
+        const endpoint = '/pix/cashIn';
+        const url = `${apiBaseUrl}${endpoint}`;
+
+        // Preparar payload conforme documentação
+        const payload = {
+          value: valorFinalCentavos, // Valor em centavos (INT, mínimo 50)
+          ...(webhookUrl && { webhook_url: webhookUrl })
+        };
+
+        console.log('📤 Payload enviado para PushinPay:', JSON.stringify(payload, null, 2));
+        console.log('📤 URL da requisição:', url);
+
+        // Fazer requisição direta à API conforme documentação
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${apiToken}`,
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
+
+        console.log('📥 Status da resposta HTTP:', response.status, response.statusText);
+
+        let pixData;
+        try {
+          const contentType = response.headers.get('content-type') || '';
+          
+          if (!contentType.includes('application/json')) {
+            const text = await response.text();
+            console.error('❌ Resposta não é JSON. Content-Type:', contentType);
+            console.error('❌ Resposta recebida (primeiros 500 caracteres):', text.substring(0, 500));
+            
+            return res.status(500).json({
+              error: 'Resposta da API não é JSON',
+              message: 'A API PushinPay retornou uma resposta que não é JSON',
+              contentType: contentType,
+              responsePreview: text.substring(0, 500)
+            });
+          }
+          
+          pixData = await response.json();
+        } catch (parseError) {
+          console.error('❌ Erro ao parsear resposta JSON:', parseError);
+          const text = await response.text().catch(() => 'Não foi possível ler a resposta');
+          console.error('Resposta recebida (texto):', text.substring(0, 500));
+          return res.status(500).json({
+            error: 'Erro ao processar resposta da API PushinPay',
+            message: 'A API retornou uma resposta inválida',
+            details: text.substring(0, 500)
+          });
+        }
+
+        console.log('📥 Resposta completa da API PushinPay:', JSON.stringify(pixData, null, 2));
+
+        if (!response.ok) {
+          console.error('❌ Erro PushinPay API:', {
+            status: response.status,
+            statusText: response.statusText,
+            data: pixData
+          });
+
+          return res.status(response.status).json({
+            error: pixData.message || pixData.error || 'Erro ao criar PIX',
+            message: pixData.message || pixData.error || 'Erro ao criar PIX',
+            details: pixData
+          });
+        }
+
+        // Adaptar resposta para formato compatível com frontend
+        // Documentação: { id, qr_code, status, value, qr_code_base64, ... }
+        const adaptedResponse = {
+          success: true,
+          hash: pixData.id,
+          identifier: pixData.id,
+          status: pixData.status || 'created', // created | paid | canceled
+          pix_code: pixData.qr_code, // Código PIX EMV completo
+          qr_code: pixData.qr_code_base64, // Imagem base64 do QR Code
+          amount: pixData.value || valorFinalCentavos,
+          payment_method: 'pix',
+          expires_at: pixData.expires_at,
+          created_at: pixData.created_at || new Date().toISOString(),
+          data: pixData
+        };
+
+        console.log('✅ Transação criada com sucesso via PushinPay:', adaptedResponse);
         
-        return res.status(error.status || 500).json({
-          error: errorMsg,
-          details: error.response || error,
-          help: 'Verifique se PUSHINPAY_TOKEN está correto e se o valor está em centavos'
+        return res.status(200).json(adaptedResponse);
+      } catch (error) {
+        console.error('❌ Erro ao criar PIX via PushinPay:', error);
+        
+        return res.status(500).json({
+          error: error.message || 'Erro ao criar PIX',
+          message: error.message || 'Erro ao criar PIX',
+          details: error.response?.data || error
         });
       }
+    }
 
-      // Extrair transaction ID de todas as formas possíveis
-      // A biblioteca PushinPay pode retornar em diferentes formatos
-      const transactionId = data.id || 
-                            data.transaction_id || 
-                            data.transactionId ||
-                            data.payment_id ||
-                            data.paymentId ||
-                            data.uuid ||
-                            data.hash ||
-                            data.identifier ||
-                            (data.data && (data.data.id || data.data.transaction_id || data.data.payment_id));
-
-      console.log('🔍 Transaction ID extraído:', transactionId);
-      console.log('📊 Dados extraídos:', {
-        transactionId,
-        status: data.status || data.data?.status,
-        hasQrCode: !!(data.qr_code_base64 || data.qrcode_base64 || data.qr_code_image || data.data?.qr_code_base64),
-        hasPixCode: !!(data.qr_code || data.pix_code || data.emv || data.data?.qr_code || data.data?.pix_code)
-      });
-
-      // Se não tiver transaction ID, gerar um temporário baseado em timestamp
-      // Isso permite que a verificação funcione mesmo sem ID inicial
-      const finalTransactionId = transactionId || `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      
-      if (!transactionId) {
-        console.warn('⚠️ Transaction ID não encontrado na resposta. Usando ID temporário:', finalTransactionId);
-      }
-
-      // Verificar se temos QR Code ou código PIX na resposta
-      // A biblioteca PushinPay pode retornar em diferentes formatos
-      const qrCodeBase64 = data.qr_code_base64 || 
-                          data.qrcode_base64 || 
-                          data.qr_code_image ||
-                          data.qr_code_image_base64 ||
-                          data.data?.qr_code_base64 ||
-                          data.data?.qrcode_base64 ||
-                          data.data?.qr_code_image;
-      
-      const pixCode = data.qr_code || 
-                     data.pix_code || 
-                     data.emv ||
-                     data.pix_qr_code ||
-                     data.qrcode ||
-                     data.data?.qr_code ||
-                     data.data?.pix_code ||
-                     data.data?.emv ||
-                     data.data?.pix_qr_code;
-
-      console.log('🔍 Verificação de QR Code e PIX Code:', {
-        hasQrCodeBase64: !!qrCodeBase64,
-        hasPixCode: !!pixCode,
-        qrCodeBase64Length: qrCodeBase64 ? qrCodeBase64.length : 0,
-        pixCodeLength: pixCode ? pixCode.length : 0,
-        allDataKeys: Object.keys(data),
-        dataStructure: data.data ? Object.keys(data.data) : 'no data property'
-      });
-
-      // Se não tiver QR Code nem código PIX, tentar consultar o pagamento novamente
-      // A biblioteca pode precisar de uma consulta adicional para obter o QR Code
-      let finalQrCodeBase64 = qrCodeBase64;
-      let finalPixCode = pixCode;
-      
-      if (!qrCodeBase64 && !pixCode && finalTransactionId && !finalTransactionId.startsWith('temp_')) {
-        console.log('🔄 QR Code não encontrado na criação. Tentando consultar pagamento...');
-        try {
-          const paymentData = await pushinpay.pix.status({
-            id: finalTransactionId
-          });
-          console.log('📦 Dados do pagamento consultado:', JSON.stringify(paymentData, null, 2));
-          
-          finalQrCodeBase64 = paymentData.qr_code_base64 || 
-                              paymentData.qrcode_base64 || 
-                              paymentData.qr_code_image ||
-                              paymentData.data?.qr_code_base64;
-          
-          finalPixCode = paymentData.qr_code || 
-                        paymentData.pix_code || 
-                        paymentData.emv ||
-                        paymentData.data?.qr_code ||
-                        paymentData.data?.pix_code;
-          
-          if (finalQrCodeBase64 || finalPixCode) {
-            console.log('✅ QR Code obtido na consulta!');
-          }
-        } catch (statusError) {
-          console.warn('⚠️ Erro ao consultar status do pagamento:', statusError.message);
-        }
-      }
-      
-      if (!finalQrCodeBase64 && !finalPixCode) {
-        console.warn('⚠️ ATENÇÃO: QR Code e código PIX não encontrados!');
-        console.warn('⚠️ Possíveis causas:');
-        console.warn('   1. Token PushinPay inválido ou não configurado');
-        console.warn('   2. A biblioteca PushinPay não está retornando os dados corretamente');
-        console.warn('   3. O formato da resposta é diferente do esperado');
-        console.warn('   4. A API PushinPay pode estar com problemas');
-        console.warn('💡 Verifique os logs acima para ver a resposta completa da biblioteca');
-      }
-
-      // Retornar dados formatados conforme esperado pelo frontend
-      const responseData = {
-        id: finalTransactionId,
-        transaction_id: finalTransactionId,
-        qr_code_base64: finalQrCodeBase64,
-        qr_code: finalPixCode,
-        status: data.status || data.data?.status || 'pending',
-        value: data.value || data.data?.value || valorFinal,
-        plano: plano
-      };
-
-      console.log('📤 Retornando dados para frontend:', {
-        id: responseData.id,
-        status: responseData.status,
-        hasQrCode: !!responseData.qr_code_base64,
-        hasPixCode: !!responseData.qr_code,
-        value: responseData.value
-      });
-
-      return res.status(200).json(responseData);
-
-    } else if (action === 'check-payment') {
+    if (action === 'check-payment') {
       const { transactionId } = req.body;
 
       if (!transactionId) {
-        return res.status(400).json({ error: 'Transaction ID é obrigatório' });
+        return res.status(400).json({ error: 'transactionId é obrigatório' });
       }
 
-      console.log('🔍 Verificando status do pagamento...', transactionId);
+      const apiToken = process.env.PUSHINPAY_TOKEN;
 
-      // Verificar status do pagamento usando a biblioteca PushinPay
-      // Documentação: https://pushinpay.com.br
-      // Status esperado: 'paid' quando confirmado
-      let data;
+      if (!apiToken) {
+        return res.status(500).json({
+          error: 'PUSHINPAY_TOKEN não configurado',
+          message: 'Configure PUSHINPAY_TOKEN nas variáveis de ambiente'
+        });
+      }
+
       try {
-        console.log('🔄 Consultando status na PushinPay para ID:', transactionId);
-        
-        // Se for um ID temporário, não tentar consultar na API
-        if (transactionId.startsWith('temp_')) {
-          console.warn('⚠️ ID temporário detectado. Não é possível verificar na API PushinPay.');
-          return res.status(200).json({
-            id: transactionId,
-            status: 'pending',
-            payment_status: 'pending',
-            paid: false,
-            confirmed: false,
-            message: 'ID temporário - aguardando ID real da transação'
+        // Base URL da API PushinPay conforme documentação
+        const apiBaseUrl = 'https://api.pushinpay.com.br/api';
+        const endpoint = `/transaction/${transactionId}`;
+        const url = `${apiBaseUrl}${endpoint}`;
+
+        console.log(`Consultando status do PIX na PushinPay: ${url}`);
+
+        // Fazer requisição direta à API conforme documentação
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${apiToken}`,
+            'Accept': 'application/json'
+          }
+        });
+
+        console.log('📥 Status da resposta HTTP:', response.status, response.statusText);
+
+        if (response.status === 404) {
+          console.log('⚠️ Transação não encontrada na PushinPay (404)');
+          return res.status(404).json({
+            error: 'Transação não encontrada',
+            message: 'A transação não foi encontrada'
+          });
+        }
+
+        let statusData;
+        try {
+          const contentType = response.headers.get('content-type') || '';
+          
+          if (!contentType.includes('application/json')) {
+            const text = await response.text();
+            console.error('❌ Resposta não é JSON. Content-Type:', contentType);
+            return res.status(500).json({
+              error: 'Resposta da API não é JSON',
+              message: 'A API PushinPay retornou uma resposta que não é JSON',
+              contentType: contentType
+            });
+          }
+          
+          statusData = await response.json();
+        } catch (parseError) {
+          console.error('❌ Erro ao parsear resposta JSON:', parseError);
+          return res.status(500).json({
+            error: 'Erro ao processar resposta da API PushinPay',
+            message: 'A API retornou uma resposta inválida'
           });
         }
         
-        data = await pushinpay.pix.status({
-          id: transactionId
-        });
+        console.log('📥 Resposta completa da consulta PushinPay:', JSON.stringify(statusData, null, 2));
+
+        if (!response.ok) {
+          console.error(`Erro ao consultar transação na PushinPay: ${response.status}`, statusData);
+          return res.status(response.status).json({
+            error: statusData.message || statusData.error || 'Erro ao verificar pagamento',
+            details: statusData
+          });
+        }
+
+        const adaptedResponse = {
+          success: true,
+          hash: statusData.id || transactionId,
+          identifier: statusData.id || transactionId,
+          status: statusData.status || 'pending', // created | paid | canceled
+          amount: statusData.value || statusData.amount,
+          payment_method: 'pix',
+          paid_at: statusData.paid_at || statusData.payment_date,
+          created_at: statusData.created_at,
+          data: statusData
+        };
         
-        console.log('✅ Status verificado com sucesso');
-        console.log('📦 Resposta completa do status:', JSON.stringify(data, null, 2));
+        return res.status(200).json(adaptedResponse);
       } catch (error) {
-        console.error('❌ Erro ao verificar pagamento:', error);
-        console.error('❌ Detalhes do erro:', {
-          message: error.message,
-          error: error.error,
-          response: error.response,
-          status: error.status
-        });
+        console.error('Erro ao consultar transação na PushinPay:', error);
         
-        const errorMsg = error.message || error.error || 'Erro desconhecido ao verificar pagamento';
-        
-        // Se for erro 404, a transação pode não existir ainda
-        if (error.status === 404 || error.response?.status === 404) {
-          console.warn('⚠️ Transação não encontrada (404). Pode ainda não ter sido criada na PushinPay.');
-          return res.status(200).json({
-            id: transactionId,
-            status: 'pending',
-            payment_status: 'pending',
-            paid: false,
-            confirmed: false,
-            message: 'Transação não encontrada - ainda pode estar sendo processada'
-          });
-        }
-        
-        return res.status(error.status || 500).json({
-          error: errorMsg,
-          details: error.response || error
+        return res.status(500).json({
+          error: 'Erro ao verificar pagamento',
+          message: error.message || 'Erro ao verificar pagamento',
+          details: error.response?.data || error
         });
       }
-
-      // Extrair status de diferentes formatos possíveis
-      const status = data.status?.toLowerCase() || 
-                     data.data?.status?.toLowerCase() ||
-                     data.payment_status?.toLowerCase() ||
-                     'pending';
-      
-      console.log('📊 Status extraído do pagamento:', status);
-      console.log('📊 Dados completos do status:', {
-        status,
-        id: data.id || data.data?.id,
-        paid: data.paid || data.data?.paid,
-        value: data.value || data.data?.value,
-        paidAt: data.paid_at || data.data?.paid_at,
-        createdAt: data.created_at || data.data?.created_at
-      });
-
-      // Verificar se está pago (PushinPay usa 'paid' como status confirmado)
-      const isPaid = status === 'paid' || 
-                     data.paid === true || 
-                     data.data?.paid === true ||
-                     status === 'completed' ||
-                     status === 'approved';
-
-      // Retornar dados formatados
-      return res.status(200).json({
-        id: data.id || data.data?.id || transactionId,
-        status: status,
-        payment_status: status,
-        paid: isPaid,
-        confirmed: isPaid,
-        value: data.value || data.data?.value,
-        created_at: data.created_at || data.data?.created_at,
-        paid_at: data.paid_at || data.data?.paid_at,
-        // Incluir dados completos para debug
-        _debug: {
-          originalStatus: data.status || data.data?.status,
-          extractedStatus: status,
-          isPaid: isPaid,
-          originalResponse: data
-        }
-      });
-
-    } else {
-      return res.status(400).json({ error: 'Ação não reconhecida. Use: create-pix ou check-payment' });
     }
 
+    return res.status(400).json({
+      error: 'Ação inválida',
+      message: 'Ação inválida'
+    });
   } catch (error) {
-    console.error('❌ Erro ao processar requisição PushinPay:', error);
+    console.error('Erro na API PushinPay:', error);
     return res.status(500).json({
-      error: 'Erro interno do servidor',
-      message: error.message
+      error: error.message || 'Erro interno do servidor',
+      message: error.message || 'Erro interno do servidor',
+      type: error.name || 'Error'
     });
   }
 }
+
+
 
